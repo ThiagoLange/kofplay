@@ -1,0 +1,5 @@
+# gerados em runtime (nao commitar)
+kofplay/submissions.jsonl
+*.class
+target/
+.kof/

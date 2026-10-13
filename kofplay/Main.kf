@@ -1,0 +1,15 @@
+// Main.kf — Ponto de entrada do KofPlay
+//
+// Uso:
+//   ./run.sh            (porta 8081)
+//   ./run.sh 9090        (outra porta)
+//   KOF_SERVER_PORT=9090 kof run Main.kf
+//
+// O Runner precisa do binário `kof` no PATH do daemon (o run.sh garante).
+// Opcional: KOF_KOFPLAY_KOF_BIN=/caminho/absoluto/kof
+
+main() {
+    var port = config.int("server.port", 8081)
+    println("KofPlay iniciando... porta " + port)
+    startDaemon(port)
+}

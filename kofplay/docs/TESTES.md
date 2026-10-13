@@ -1,0 +1,44 @@
+# TESTES — KofPlay MVP (Kof 0.5.0-beta, JVM)
+
+## 1. Unitários (`kof test`)
+
+```bash
+kof test kofplay/Lessons.kf   # 4 testes
+kof test kofplay/Runner.kf     # 4 testes
+```
+
+| Arquivo | Teste | Resultado |
+|---|---|---|
+| Lessons | catálogo tem 19 lições | PASS ✅ |
+| Lessons | ids são únicos | PASS ✅ |
+| Lessons | lookup por id + missing | PASS ✅ |
+| Lessons | todo expected termina com `\n` | PASS ✅ |
+| Runner | classifyError (NONE/TIMEOUT/COMPILE/RUNTIME) | PASS ✅ |
+| Runner | rejeita código vazio | PASS ✅ |
+| Runner | hello funciona (exit 0, `Oi\n`) | PASS ✅ |
+| Runner | erro de compilação → COMPILE | PASS ✅ |
+
+## 2. E2E (servidor em 8081)
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | `GET /api/health` (port, timeout 25, kof_version) | ✅ |
+| 2 | `GET /api/lessons` (19 lições, campos completos) | ✅ |
+| 3 | `POST /api/run` erro real (`SEM011` no stderr) | ✅ |
+| 4–9 | `POST /api/submit` com a `solution` das 6 lições originais | 6× PASS (10+15+20+25+30+50 XP) ✅ |
+| 14 | `POST /api/submit` com a `solution` das 13 lições novas | 13× PASS ✅ (if-else, switch, while, strings, classes, enums, mapas-sets, null-safe, exceptions, lambdas, arquivos, json, concorrencia) |
+| 15 | XP total do currículo (19 lições) | 460 XP | ✅ |
+| 10 | submit com resposta errada (`got 1` vs `expected 42`) | `passed:false`, diff no output ✅ |
+| 11 | submit lição inexistente | `licao desconhecida` ✅ |
+| 12 | `GET /` como `text/html` (renderiza no navegador) | ✅ |
+| 13 | `submissions.jsonl` com 7 linhas auditadas | ✅ |
+
+## 3. UI v2 autocontida (sem CDN, mesmo padrão do KofBox)
+
+| # | Caso | Resultado |
+|---|---|---|
+| 14 | `GET /styles.css` → `text/css`, idêntico ao arquivo | ✅ |
+| 15 | `GET /app.js` → `application/javascript`, idêntico + `node --check` OK | ✅ |
+| 16 | HTML sem handlers/`<script>`/`<style>` inline; tags balanceadas; ids do JS existem | ✅ |
+
+Para repetir: `./run.sh 8081` + seção 2 (troque `solution` pelo seu código).

@@ -1,0 +1,127 @@
+// Runner.kf — Execução isolada de código Kof (Kof real, 0.5.0-beta)
+//
+// Estratégia: grava o código em /tmp/kofplay_<UUID>.kf e roda o compilador
+// Kof de verdade como subprocesso NATIVO (`process.run`), com timeout via
+// GNU `timeout`. Erros de compilação vêm com os códigos amigáveis da
+// linguagem (PARSE010, SEM015…). UUID no temp file (sem race), writeText
+// checado, limite de 64KB.
+
+import java.util.UUID
+
+record RunResult(Int exitCode, String stdout, String stderr, String status, String errorKind)
+
+String kofBin() {
+    return config.str("kofplay.kof-bin", "kof")
+}
+
+Int runTimeout() {
+    var t = config.int("kofplay.timeout-seconds", 25)
+    if (t <= 0) {
+        return 25
+    }
+    return t
+}
+
+// Versão do compilador (lazy + cache; usada no /api/health)
+class KofInfo {
+    static String version = ""
+}
+
+String kofVersion() {
+    if (KofInfo.version != "") {
+        return KofInfo.version
+    }
+    var r = process.run(kofBin(), "version")
+    var out = r.stdout
+    if (out == null) {
+        out = "unknown"
+    }
+    if (r.exitCode == 0) {
+        KofInfo.version = out
+    }
+    return out
+}
+
+String classifyError(String stderr, Int exitCode) {
+    if (exitCode == 0) {
+        return "NONE"
+    }
+    if (exitCode == 124) {
+        return "TIMEOUT"
+    }
+    if (stderr.contains("error:")) {
+        return "COMPILE"
+    }
+    if (stderr.contains("PARSE") || stderr.contains("SEM")) {
+        return "COMPILE"
+    }
+    return "RUNTIME"
+}
+
+RunResult runKof(String id, String code) {
+    if (code == "") {
+        return RunResult(-1, "", "codigo vazio: nada para executar", "FAILED", "COMPILE")
+    }
+    if (code.length() > 65536) {
+        return RunResult(-1, "", "codigo excede o limite de 64KB", "FAILED", "COMPILE")
+    }
+
+    var u = UUID.randomUUID()
+    var filePath = "/tmp/kofplay_" + u.toString() + ".kf"
+
+    var path = Path(filePath)
+    var ok = path.writeText(code)
+    if (ok == false) {
+        log.info("KofPlay FALHA ao gravar id=" + id)
+        return RunResult(-1, "", "falha ao gravar arquivo temporario", "FAILED", "RUNTIME")
+    }
+    log.info("KofPlay executando id=" + id + " -> " + filePath)
+
+    var timeoutStr = "" + runTimeout()
+    var r = process.run("timeout", timeoutStr + "s", kofBin(), "run", filePath)
+    var exitCode = r.exitCode
+    var stdout = r.stdout
+    if (stdout == null) {
+        stdout = ""
+    }
+    var stderr = r.stderr
+    if (stderr == null) {
+        stderr = ""
+    }
+    path.delete()
+
+    var status = "FAILED"
+    if (exitCode == 0) {
+        status = "SUCCESS"
+    }
+    return RunResult(exitCode, stdout, stderr, status, classifyError(stderr, exitCode))
+}
+
+// ---- Testes (`kof test kofplay/Runner.kf`) ----
+
+test "classifyError cobre os casos" {
+    assert(classifyError("", 0) == "NONE")
+    assert(classifyError("", 124) == "TIMEOUT")
+    assert(classifyError("Main.kf:1:5: error: X [SEM015]", 1) == "COMPILE")
+    assert(classifyError("Exception in thread main", 1) == "RUNTIME")
+}
+
+test "runKof rejeita codigo vazio" {
+    var r = runKof("t-empty", "")
+    assert(r.exitCode() == -1)
+    assert(r.status() == "FAILED")
+}
+
+test "runKof hello funciona" {
+    var r = runKof("t-hello", "main() {\n    println(\"Oi\")\n}\n")
+    assert(r.exitCode() == 0)
+    assert(r.status() == "SUCCESS")
+    assert(r.stdout() == "Oi\n")
+    assert(r.errorKind() == "NONE")
+}
+
+test "runKof erro de compilacao classifica COMPILE" {
+    var r = runKof("t-err", "main() {\n    println(desconhecida)\n}\n")
+    assert(r.exitCode() != 0)
+    assert(r.errorKind() == "COMPILE")
+}

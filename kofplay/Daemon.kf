@@ -1,0 +1,215 @@
+// Daemon.kf — Servidor HTTP do KofPlay (Kof real, 0.5.0-beta)
+//
+// Rotas: GET / (UI), GET /api/health, GET /api/lessons,
+// POST /api/run {code}, POST /api/submit {lessonId, code}.
+// Auth opcional via kofplay.api-key; log/auditoria em submissions.jsonl.
+
+import java.lang.Exception
+
+record RunRequest(String code)
+record SubmitRequest(String lessonId, String code)
+
+String submissionsPath() {
+    return config.str("kofplay.history-file", "submissions.jsonl")
+}
+
+void logSubmit(String lessonId, Bool passed, Int xp) {
+    var p = Path(submissionsPath())
+    var xpStr = "" + xp
+    var line = "{\"lesson\":\"" + lessonId + "\",\"passed\":" + boolStrOf(passed) + ",\"xp\":" + xpStr + "}"
+    if (p.exists()) {
+        p.appendText(line + "\n")
+    } else {
+        p.writeText(line + "\n")
+    }
+}
+
+String boolStrOf(Bool b) {
+    if (b) {
+        return "true"
+    }
+    return "false"
+}
+
+Bool authorized() {
+    var want = config.str("kofplay.api-key", "")
+    if (want == "") {
+        return true
+    }
+    var got = header("x-api-key")
+    if (got == null) {
+        return false
+    }
+    if (got == want) {
+        return true
+    }
+    return false
+}
+
+String unauthorizedJson() {
+    return "{\"passed\":false,\"xpAwarded\":0,\"error\":\"unauthorized: x-api-key invalida ou ausente\"}"
+}
+
+class IndexCache {
+    static String html = ""
+    static String css = ""
+    static String js = ""
+}
+
+String readPublic(String p1, String p2) {
+    var a = Path(p1)
+    if (a.exists()) {
+        var t = a.readText()
+        if (t != null) {
+            return t
+        }
+    }
+    var b = Path(p2)
+    if (b.exists()) {
+        var u = b.readText()
+        if (u != null) {
+            return u
+        }
+    }
+    return ""
+}
+
+String loadIndex() {
+    if (IndexCache.html != "") {
+        return IndexCache.html
+    }
+    var c = readPublic("public/index.html", "kofplay/public/index.html")
+    if (c == "") {
+        return "<html><body><h1>KofPlay online</h1><p>UI nao encontrada. Use /api/health e /api/lessons.</p></body></html>"
+    }
+    IndexCache.html = c
+    return c
+}
+
+String loadCss() {
+    if (IndexCache.css != "") {
+        return IndexCache.css
+    }
+    var c = readPublic("public/styles.css", "kofplay/public/styles.css")
+    if (c == "") {
+        return "/* kofplay: styles.css nao encontrado */"
+    }
+    IndexCache.css = c
+    return c
+}
+
+String loadJs() {
+    if (IndexCache.js != "") {
+        return IndexCache.js
+    }
+    var c = readPublic("public/app.js", "kofplay/public/app.js")
+    if (c == "") {
+        return "/* kofplay: app.js nao encontrado */"
+    }
+    IndexCache.js = c
+    return c
+}
+
+String healthJson(String portStr) {
+    var timeoutStr = "" + runTimeout()
+    var key = config.str("kofplay.api-key", "")
+    var auth = "false"
+    if (key != "") {
+        auth = "true"
+    }
+    return "{\"status\":\"UP\",\"service\":\"kofplay\",\"port\":" + portStr + ",\"timeout_seconds\":" + timeoutStr + ",\"auth_required\":" + auth + ",\"kof_version\":" + json.encode(kofVersion()) + "}"
+}
+
+String submitJson(String lessonId, String code) {
+    if (lessonExists(lessonId) == false) {
+        return "{\"passed\":false,\"xpAwarded\":0,\"error\":\"licao desconhecida: " + lessonId + "\"}"
+    }
+    var lesson = findLesson(lessonId)
+    var result = runKof(lessonId, code)
+    var passed = false
+    if (result.exitCode() == 0) {
+        if (result.stdout() == lesson.expected()) {
+            passed = true
+        }
+    }
+    var xpAwarded = 0
+    if (passed) {
+        xpAwarded = lesson.xp()
+    }
+    var xpStr = "" + xpAwarded
+    logSubmit(lessonId, passed, xpAwarded)
+    return "{\"passed\":" + boolStrOf(passed) + ",\"xpAwarded\":" + xpStr + ",\"expected\":" + json.encode(lesson.expected()) + ",\"got\":" + json.encode(result.stdout()) + ",\"run\":" + json.encode(result) + "}"
+}
+
+void startDaemon(Int port) {
+    println("KofPlay rodando em http://localhost:" + port)
+    log.info("KofPlay daemon iniciando na porta " + port)
+
+    var portStr = "" + port
+    var app = web.app()
+
+    app.get("/") {
+        log.info("REQ GET /")
+        headerSet("Content-Type", "text/html; charset=utf-8")
+        return loadIndex()
+    }
+
+    app.get("/styles.css") {
+        log.info("REQ GET /styles.css")
+        headerSet("Content-Type", "text/css; charset=utf-8")
+        return loadCss()
+    }
+
+    app.get("/app.js") {
+        log.info("REQ GET /app.js")
+        headerSet("Content-Type", "application/javascript; charset=utf-8")
+        return loadJs()
+    }
+
+    app.get("/api/health") {
+        log.info("REQ GET /api/health")
+        return healthJson(portStr)
+    }
+
+    app.get("/api/lessons") {
+        log.info("REQ GET /api/lessons")
+        return lessonsJson()
+    }
+
+    app.post("/api/run") {
+        log.info("REQ POST /api/run")
+        if (authorized() == false) {
+            return unauthorizedJson()
+        }
+        try {
+            var req = json.decode<RunRequest>(body())
+            var result = runKof("run", req.code())
+            return json.encode(result)
+        } catch (Exception e) {
+            var msg = e.getMessage()
+            if (msg == null) {
+                msg = "erro desconhecido"
+            }
+            return "{\"exitCode\":-1,\"stdout\":\"\",\"stderr\":" + json.encode(msg) + ",\"status\":\"FAILED\",\"errorKind\":\"COMPILE\"}"
+        }
+    }
+
+    app.post("/api/submit") {
+        log.info("REQ POST /api/submit")
+        if (authorized() == false) {
+            return unauthorizedJson()
+        }
+        try {
+            var req = json.decode<SubmitRequest>(body())
+            return submitJson(req.lessonId(), req.code())
+        } catch (Exception e) {
+            var msg = e.getMessage()
+            if (msg == null) {
+                msg = "erro desconhecido"
+            }
+            return "{\"passed\":false,\"xpAwarded\":0,\"error\":" + json.encode(msg) + "}"
+        }
+    }
+
+    app.listen(port)
+}

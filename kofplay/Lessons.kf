@@ -1,0 +1,278 @@
+// Lessons.kf — Catálogo de lições do KofPlay (Kof real, 0.5.0-beta)
+//
+// Cada Lesson vira JSON via json.encode (records + List aninhados funcionam).
+// `expected` é comparado com igualdade EXATA contra o stdout (println sempre
+// termina com \n — os valores abaixo foram capturados no compilador real).
+
+record Lesson(String id, String title, String difficulty, Int xp, String description, String starter, String expected, String hint, String solution)
+
+List<Lesson> allLessons() {
+    return listOf(
+        Lesson(
+            "hello-kof",
+            "Olá, Kof!",
+            "Fácil",
+            10,
+            "Todo programador começa com um hello. Em Kof, um programa completo pode ter 3 linhas: o bloco main() e um println. Complete o código para imprimir exatamente: Olá, Kof!",
+            "main() {\n    // TODO: imprima \"Olá, Kof!\"\n}\n",
+            "Olá, Kof!\n",
+            "Use println(\"...\") dentro do main().",
+            "main() {\n    println(\"Olá, Kof!\")\n}\n"
+        ),
+        Lesson(
+            "variaveis",
+            "Variáveis var e val",
+            "Fácil",
+            15,
+            "var cria variável mutável, val cria constante. O tipo é inferido: o compilador já sabe que 36 é Int. Monte a frase usando concatenação com + (dá para somar texto com número).",
+            "main() {\n    var nome = \"Ada\"\n    var idade = 36\n    // TODO: imprima \"Ada tem 36 anos\"\n}\n",
+            "Ada tem 36 anos\n",
+            "println(nome + \" tem \" + idade + \" anos\")",
+            "main() {\n    var nome = \"Ada\"\n    var idade = 36\n    println(nome + \" tem \" + idade + \" anos\")\n}\n"
+        ),
+        Lesson(
+            "funcoes",
+            "Sua primeira função",
+            "Médio",
+            20,
+            "Funções em Kof declaram o retorno antes do nome, sem palavra-chave fun: Int dobro(Int x). Crie a função e use-a com 21 para obter 42.",
+            "// TODO: crie Int dobro(Int x) que retorna x * 2\nmain() {\n    println(dobro(21))\n}\n",
+            "42\n",
+            "Int dobro(Int x) {\n    return x * 2\n}",
+            "Int dobro(Int x) {\n    return x * 2\n}\nmain() {\n    println(dobro(21))\n}\n"
+        ),
+        Lesson(
+            "records",
+            "Modelando com records",
+            "Médio",
+            25,
+            "Um record gera classe + construtor + acessores + toString automaticamente. Crie um Ponto(3, 4) e imprima-o: a saída mostra o formato Ponto[x=3, y=4].",
+            "record Ponto(Int x, Int y)\nmain() {\n    // TODO: crie Ponto(3, 4) e imprima com println\n}\n",
+            "Ponto[x=3, y=4]\n",
+            "var p = Ponto(3, 4) e depois println(p). Sem `new`.",
+            "record Ponto(Int x, Int y)\nmain() {\n    var p = Ponto(3, 4)\n    println(p)\n}\n"
+        ),
+        Lesson(
+            "listas",
+            "Listas e laços",
+            "Médio",
+            30,
+            "listOf cria uma lista e for-in percorre cada item. Imprima a, b e c, um por linha.",
+            "main() {\n    var items = listOf(\"a\", \"b\", \"c\")\n    // TODO: imprima cada item com println\n}\n",
+            "a\nb\nc\n",
+            "for (var item in items) {\n    println(item)\n}",
+            "main() {\n    var items = listOf(\"a\", \"b\", \"c\")\n    for (var item in items) {\n        println(item)\n    }\n}\n"
+        ),
+        Lesson(
+            "if-else",
+            "Decisões com if e else",
+            "Fácil",
+            15,
+            "if testa uma condição, else cobre o resto. Classifique o número: positivo se maior que zero, negativo se menor, zero no resto. Aninhe um if dentro do else.",
+            "main() {\n    var n = -7\n    // TODO: imprima \"positivo\", \"negativo\" ou \"zero\"\n}\n",
+            "negativo\n",
+            "if (n > 0) { ... } else { if (n < 0) { ... } else { ... } }",
+            "main() {\n    var n = -7\n    if (n > 0) {\n        println(\"positivo\")\n    } else {\n        if (n < 0) {\n            println(\"negativo\")\n        } else {\n            println(\"zero\")\n        }\n    }\n}\n"
+        ),
+        Lesson(
+            "switch",
+            "Switch sem if em cascata",
+            "Fácil",
+            15,
+            "Quando há vários valores fixos, switch com case e default lê melhor que if atrás de if. Mapeie o dia 3 para quarta.",
+            "main() {\n    var dia = 3\n    var r = \"\"\n    // TODO: switch que define r (1=segunda, 2=terca, 3=quarta, resto=outro)\n    println(r)\n}\n",
+            "quarta\n",
+            "switch (dia) {\n    case 3: { r = \"quarta\" }\n    default: { r = \"outro\" }\n}",
+            "main() {\n    var dia = 3\n    var r = \"\"\n    switch (dia) {\n        case 1: { r = \"segunda\" }\n        case 2: { r = \"terca\" }\n        case 3: { r = \"quarta\" }\n        default: { r = \"outro\" }\n    }\n    println(r)\n}\n"
+        ),
+        Lesson(
+            "while",
+            "Laços while",
+            "Fácil",
+            15,
+            "while repete enquanto a condição for verdadeira. Some de 1 a 5. Cuidado: sem atualizar o contador, o laço nunca termina!",
+            "main() {\n    var soma = 0\n    var i = 1\n    // TODO: while somando i de 1 a 5, depois println(soma)\n}\n",
+            "15\n",
+            "while (i <= 5) {\n    soma = soma + i\n    i = i + 1\n}",
+            "main() {\n    var soma = 0\n    var i = 1\n    while (i <= 5) {\n        soma = soma + i\n        i = i + 1\n    }\n    println(soma)\n}\n"
+        ),
+        Lesson(
+            "strings",
+            "Métodos de strings",
+            "Fácil",
+            15,
+            "Strings têm métodos úteis: length() conta caracteres, contains() testa conteúdo, + concatena. bools imprimem true/false.",
+            "main() {\n    var frase = \"Kof rules\"\n    // TODO: imprima length, contains(\"rules\") e frase + \"!\"\n}\n",
+            "9\ntrue\nKof rules!\n",
+            "println(frase.length()) e println(frase.contains(\"rules\"))",
+            "main() {\n    var frase = \"Kof rules\"\n    println(frase.length())\n    println(frase.contains(\"rules\"))\n    println(frase + \"!\")\n}\n"
+        ),
+        Lesson(
+            "classes",
+            "Classes com métodos",
+            "Médio",
+            20,
+            "class com parâmetros vira campos automaticamente, e métodos usam os campos direto. greeting() monta a saudação; user.name lê o campo de fora.",
+            "class User(String name, String email) {\n    // TODO: método greeting(): String que retorna name + \" <\" + email + \">\"\n}\nmain() {\n    var user = User(\"Mel\", \"mel@kof.dev\")\n    println(user.greeting())\n    println(user.name)\n}\n",
+            "Mel <mel@kof.dev>\nMel\n",
+            "greeting(): String {\n    return name + \" <\" + email + \">\"\n}",
+            "class User(String name, String email) {\n    greeting(): String {\n        return name + \" <\" + email + \">\"\n    }\n}\nmain() {\n    var user = User(\"Mel\", \"mel@kof.dev\")\n    println(user.greeting())\n    println(user.name)\n}\n"
+        ),
+        Lesson(
+            "enums",
+            "Enums: conjunto fechado",
+            "Médio",
+            20,
+            "enum declara valores fixos. println mostra o nome, values() lista todos, valueOf busca pelo nome e name() devolve a string.",
+            "enum Color { Red, Green, Blue }\nmain() {\n    // TODO: imprima Red, a lista values() e o name() de valueOf(\"Green\")\n}\n",
+            "Red\n[Red, Green, Blue]\nGreen\n",
+            "println(Color.Red), println(Color.values()), Color.valueOf(\"Green\").name()",
+            "enum Color { Red, Green, Blue }\nmain() {\n    println(Color.Red)\n    println(Color.values())\n    var c = Color.valueOf(\"Green\")\n    println(c.name())\n}\n"
+        ),
+        Lesson(
+            "mapas-sets",
+            "Mapas e conjuntos",
+            "Médio",
+            20,
+            "Map guarda pares chave→valor (put/get/size) e Set guarda únicos (add/contains/size). Aqui só consultas que sempre existem.",
+            "main() {\n    var notas = mapOf(\"ana\", \"9\")\n    // TODO: put bob=7, imprima get(ana), size; set com a,b + c, imprima size\n}\n",
+            "9\n2\n3\n",
+            "notas.put(\"bob\", \"7\"); setOf(\"a\", \"b\") + add(\"c\")",
+            "main() {\n    var notas = mapOf(\"ana\", \"9\")\n    notas.put(\"bob\", \"7\")\n    println(notas.get(\"ana\"))\n    println(notas.size())\n    var times = setOf(\"a\", \"b\")\n    times.add(\"c\")\n    println(times.size())\n}\n"
+        ),
+        Lesson(
+            "null-safe",
+            "Null safety",
+            "Médio",
+            25,
+            "Em Kof, ausência é valor de verdade: Map.get devolve String? (pode ser null). Atribuir null direto é proibido; o jeito certo é testar com if (x != null), que estreita o tipo.",
+            "main() {\n    var m = mapOf(\"nome\", \"Ada\")\n    // TODO: busque \"nome\" e \"zzz\"; imprima o valor ou \"chave ausente\"\n}\n",
+            "Ada\nchave ausente\n",
+            "String? v = m.get(\"zzz\"); if (v != null) { println(v) } else { ... }",
+            "main() {\n    var m = mapOf(\"nome\", \"Ada\")\n    String? a = m.get(\"nome\")\n    if (a != null) {\n        println(a)\n    }\n    String? v = m.get(\"zzz\")\n    if (v != null) {\n        println(v)\n    } else {\n        println(\"chave ausente\")\n    }\n}\n"
+        ),
+        Lesson(
+            "exceptions",
+            "Erros sob controle",
+            "Médio",
+            25,
+            "throw lança um erro e try/catch captura. O catch declara o tipo: throw \"texto\" casa com catch (String e). O programa segue depois do catch.",
+            "String risco(Bool pode) {\n    if (pode) {\n        throw \"boom\"\n    }\n    return \"seguro\"\n}\nmain() {\n    // TODO: try/catch em risco(true) imprimindo \"peguei: \" + e; depois println(risco(false))\n}\n",
+            "peguei: boom\nseguro\n",
+            "try {\n    println(risco(true))\n} catch (String e) {\n    println(\"peguei: \" + e)\n}",
+            "String risco(Bool pode) {\n    if (pode) {\n        throw \"boom\"\n    }\n    return \"seguro\"\n}\nmain() {\n    try {\n        println(risco(true))\n    } catch (String e) {\n        println(\"peguei: \" + e)\n    }\n    println(risco(false))\n}\n"
+        ),
+        Lesson(
+            "lambdas",
+            "Map e filter com lambdas",
+            "Médio",
+            30,
+            "Listas têm map (transforma cada item) e filter (só os que passam no teste). A regra vai numa lambda: (x) -> x * 2. Imprimir a lista mostra [2, 4, 6, 8].",
+            "main() {\n    var nums = listOf(1, 2, 3, 4)\n    // TODO: dobros via map, pares via filter, imprima ambos\n}\n",
+            "[2, 4, 6, 8]\n[2, 4]\n",
+            "nums.map((x) -> x * 2) e nums.filter((x) -> x % 2 == 0)",
+            "main() {\n    var nums = listOf(1, 2, 3, 4)\n    var dobros = nums.map((x) -> x * 2)\n    println(dobros)\n    var pares = nums.filter((x) -> x % 2 == 0)\n    println(pares)\n}\n"
+        ),
+        Lesson(
+            "arquivos",
+            "Arquivos com kof.io",
+            "Médio",
+            30,
+            "Path escreve e lê texto UTF-8 com a mesma API em todo target. Grave duas linhas, leia de volta com print (sem quebra extra) e delete o arquivo.",
+            "main() {\n    var path = Path(\"/tmp/kofplay_lesson.txt\")\n    // TODO: writeText, print(readText), delete\n}\n",
+            "linha1\nlinha2\n",
+            "path.writeText(\"linha1\\nlinha2\\n\"); print(path.readText()); path.delete()",
+            "main() {\n    var path = Path(\"/tmp/kofplay_lesson.txt\")\n    path.writeText(\"linha1\\nlinha2\\n\")\n    print(path.readText())\n    path.delete()\n}\n"
+        ),
+        Lesson(
+            "json",
+            "JSON tipado",
+            "Médio",
+            30,
+            "json.encode serializa records e json.decode<T> reconstrói com tipo. Ida e volta sem parser manual: encode, imprima, decode e leia o campo.",
+            "record Aluno(String nome, Int nota)\nmain() {\n    // TODO: encode de Aluno(\"Ada\", 10), imprima, decode e imprima nome\n}\n",
+            "{\"nome\":\"Ada\",\"nota\":10}\nAda\n",
+            "var s = json.encode(a); var b = json.decode<Aluno>(s); println(b.nome())",
+            "record Aluno(String nome, Int nota)\nmain() {\n    var a = Aluno(\"Ada\", 10)\n    var s = json.encode(a)\n    println(s)\n    var b = json.decode<Aluno>(s)\n    println(b.nome())\n}\n"
+        ),
+        Lesson(
+            "concorrencia",
+            "Paralelismo com spawn",
+            "Difícil",
+            50,
+            "Kof não expõe Thread: spawn dispara a tarefa (virtual thread na JVM) e devolve um handle; await espera o valor. O main segue enquanto a soma acontece.",
+            "Int somar(Int a, Int b) {\n    return a + b\n}\nmain() {\n    // TODO: spawn somar(20, 22), imprima \"calculando...\", depois await e imprima\n}\n",
+            "calculando...\n42\n",
+            "val r = spawn somar(20, 22); println(\"calculando...\"); println(await r)",
+            "Int somar(Int a, Int b) {\n    return a + b\n}\nmain() {\n    val r = spawn somar(20, 22)\n    println(\"calculando...\")\n    println(await r)\n}\n"
+        ),
+        Lesson(
+            "fizzbuzz",
+            "Desafio FizzBuzz",
+            "Difícil",
+            50,
+            "O clássico das entrevistas, em Kof. De 1 a 15: múltiplo de 15 → FizzBuzz, de 3 → Fizz, de 5 → Buzz, resto → o próprio número. Operadores: % (resto), ==, if/else aninhados.",
+            "main() {\n    for (var i = 1; i <= 15; i++) {\n        // TODO: FizzBuzz completo com println\n    }\n}\n",
+            "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n",
+            "Teste i % 15 primeiro (senão o 15 cai no Fizz). println(i) imprime número.",
+            "main() {\n    for (var i = 1; i <= 15; i++) {\n        if (i % 15 == 0) {\n            println(\"FizzBuzz\")\n        } else {\n            if (i % 3 == 0) {\n                println(\"Fizz\")\n            } else {\n                if (i % 5 == 0) {\n                    println(\"Buzz\")\n                } else {\n                    println(i)\n                }\n            }\n        }\n    }\n}\n"
+        )
+    )
+}
+
+String lessonsJson() {
+    return json.encode(allLessons())
+}
+
+Int lessonCount() {
+    var items = allLessons()
+    return items.size()
+}
+
+Lesson findLesson(String id) {
+    var items = allLessons()
+    for (var l in items) {
+        if (l.id() == id) {
+            return l
+        }
+    }
+    return Lesson("missing", "missing", "", 0, "", "", "", "", "")
+}
+
+Bool lessonExists(String id) {
+    var l = findLesson(id)
+    if (l.id() == "missing") {
+        return false
+    }
+    return true
+}
+
+// ---- Testes (`kof test kofplay/Lessons.kf`) ----
+
+test "catalogo tem 19 licoes" {
+    assert(lessonCount() == 19)
+}
+
+test "ids sao unicos" {
+    var items = allLessons()
+    for (var i = 0; i < items.size(); i++) {
+        for (var j = i + 1; j < items.size(); j++) {
+            assert(items.get(i).id() != items.get(j).id())
+        }
+    }
+}
+
+test "lookup por id" {
+    var l = findLesson("funcoes")
+    assert(l.title() == "Sua primeira função")
+    assert(l.xp() == 20)
+    assert(lessonExists("fizzbuzz"))
+    assert(lessonExists("nao-existe") == false)
+}
+
+test "expected termina com quebra de linha" {
+    var items = allLessons()
+    for (var l in items) {
+        assert(l.expected().contains("\n"))
+    }
+}
