@@ -1,6 +1,6 @@
 # 🎮 KofPlay — Aprenda Kof jogando (Codecademy/LeetCode em Kof puro)
 
-> **Status:** MVP funcional em **Kof real (0.5.0-beta, target JVM)**.
+> **Status:** MVP funcional em **Kof real (0.6.4, target JVM)**.
 > Especificação original: [`../projeto_kofplay_playground_runner.md`](../projeto_kofplay_playground_runner.md).
 
 Plataforma web onde você aprende **a própria linguagem Kof** resolvendo desafios

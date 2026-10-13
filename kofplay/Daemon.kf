@@ -1,4 +1,4 @@
-// Daemon.kf — Servidor HTTP do KofPlay (Kof real, 0.5.0-beta)
+// Daemon.kf — Servidor HTTP do KofPlay (Kof real, 0.6.4)
 //
 // Rotas: GET / (UI), GET /api/health, GET /api/lessons,
 // POST /api/run {code}, POST /api/submit {lessonId, code}.

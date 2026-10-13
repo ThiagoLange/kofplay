@@ -6,7 +6,7 @@ Base: `http://localhost:8081` (ou `KOF_SERVER_PORT`).
 
 ```json
 {"status":"UP","service":"kofplay","port":8081,"timeout_seconds":25,
- "auth_required":false,"kof_version":"kof 0.5.0-beta\n"}
+ "auth_required":false,"kof_version":"kof 0.6.4\n"}
 ```
 
 ## GET /api/lessons

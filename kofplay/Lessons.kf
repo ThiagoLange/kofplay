@@ -1,4 +1,4 @@
-// Lessons.kf — Catálogo de lições do KofPlay (Kof real, 0.5.0-beta)
+// Lessons.kf — Catálogo de lições do KofPlay (Kof real, 0.6.4)
 //
 // Cada Lesson vira JSON via json.encode (records + List aninhados funcionam).
 // `expected` é comparado com igualdade EXATA contra o stdout (println sempre

@@ -1,4 +1,4 @@
-# TESTES — KofPlay MVP (Kof 0.5.0-beta, JVM)
+# TESTES — KofPlay MVP (Kof 0.6.4, JVM)
 
 ## 1. Unitários (`kof test`)
 

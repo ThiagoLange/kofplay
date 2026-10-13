@@ -1,4 +1,4 @@
-// Runner.kf — Execução isolada de código Kof (Kof real, 0.5.0-beta)
+// Runner.kf — Execução isolada de código Kof (Kof real, 0.6.4)
 //
 // Estratégia: grava o código em /tmp/kofplay_<UUID>.kf e roda o compilador
 // Kof de verdade como subprocesso NATIVO (`process.run`), com timeout via
