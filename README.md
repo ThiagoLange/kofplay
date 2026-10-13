@@ -63,8 +63,35 @@ projeto_kofplay_playground_runner.md  # especificação original (hackathon)
 
 ## Docs
 
-- [`kofplay/README.md`](kofplay/README.md) — quickstart, API resumida, decisões técnicas
 - [`kofplay/docs/API.md`](kofplay/docs/API.md) — contratos das rotas
 - [`kofplay/docs/ARQUITETURA.md`](kofplay/docs/ARQUITETURA.md) — desenho do sistema
 - [`kofplay/docs/SEGURANCA.md`](kofplay/docs/SEGURANCA.md) — limites honestos do Runner
 - [`kofplay/docs/TESTES.md`](kofplay/docs/TESTES.md) — unitários + E2E
+
+## Desenvolvimento
+
+```bash
+export PATH="$HOME/.kof/bin:$PATH"
+cd kofplay
+kof test Lessons.kf   # 4 testes
+kof test Runner.kf    # 4 testes
+./run.sh              # http://localhost:8081
+```
+
+> O Runner precisa do binário `kof` no PATH do daemon (o `run.sh` garante).
+> Auth opcional: `kofplay.api-key` exige header `x-api-key` em `/api/run` e `/api/submit`.
+
+## Lições (19, PT-BR, 460 XP total)
+
+Básico: hello-kof (10) · variaveis (15) · if-else (15) · switch (15) · while (15) ·
+strings (15) · funcoes (20) · listas (30).
+Intermediário: classes (20) · enums (20) · mapas-sets (20) · null-safe (25) ·
+exceptions (25) · lambdas (30) · arquivos (30) · json (30) · records (25).
+Avançado: concorrencia/spawn (50) · fizzbuzz (50, chefe final).
+
+## Decisões técnicas
+
+- **Execução = compilador real**: `Runner.kf` grava `/tmp/kofplay_<UUID>.kf` e roda
+  `kof run` com `timeout` — o aluno vê diagnósticos idênticos aos do terminal.
+- **XP no cliente** (localStorage; anti-farm simples: XP só conta 1× por lição);
+  servidor é autoridade do veredito e mantém auditoria (não commitada).
