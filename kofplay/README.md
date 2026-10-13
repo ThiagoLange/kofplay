@@ -22,6 +22,30 @@ kofplay/
 └── docs/              # API.md, TESTES.md, ARQUITETURA.md, SEGURANCA.md
 ```
 
+## Instalação
+
+Pré-requisito: **Kof 0.6.4** (testado nessa versão; o Runner usa o binário `kof` do PATH).
+
+```bash
+# 1. Toolchain Kof (Linux x86_64) — ~380MB
+cd /tmp
+curl -sL -o kof.tgz "https://github.com/KofLang/Kof4j/releases/download/kof-0.6.4-linux-x86_64/kof-0.6.4-linux-x86_64.tar.gz"
+curl -sL -o SHA256SUMS "https://github.com/KofLang/Kof4j/releases/download/kof-0.6.4-linux-x86_64/SHA256SUMS"
+sha256sum -c SHA256SUMS --ignore-missing
+mkdir -p /tmp/kof064 && tar -xzf kof.tgz -C /tmp/kof064
+mv /tmp/kof064/kof-0.6.4-linux-x86_64 "$HOME/.kof"
+export PATH="$HOME/.kof/bin:$PATH"
+kof version  # deve imprimir: kof 0.6.4
+
+# 2. KofPlay
+git clone https://github.com/ThiagoLange/kofplay.git
+cd kofplay/kofplay
+./run.sh              # http://localhost:8081
+```
+
+> Dica: ponha `export PATH="$HOME/.kof/bin:$PATH"` no `~/.bashrc` para não repetir.
+> Porta alternativa: `./run.sh 9090` (ou `KOF_SERVER_PORT=9090`).
+
 ## Quickstart
 
 ```bash
