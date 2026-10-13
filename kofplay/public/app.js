@@ -26,6 +26,12 @@
                 localStorage.setItem("kofplay_xp", String(this.xp() + v));
             } catch (e) {}
             return true;
+        },
+        reset: function () {
+            try {
+                localStorage.removeItem("kofplay_done");
+                localStorage.removeItem("kofplay_xp");
+            } catch (e) {}
         }
     };
 
@@ -212,6 +218,11 @@
     });
     $("apiKeyInput").addEventListener("change", function () {
         try { localStorage.setItem("kofplay_api_key", $("apiKeyInput").value); } catch (e) {}
+    });
+    $("resetBtn").addEventListener("click", function () {
+        if (!confirm("Zerar XP e lições concluídas e recomeçar do zero?")) { return; }
+        store.reset();
+        refreshXp();
     });
     try { $("apiKeyInput").value = localStorage.getItem("kofplay_api_key") || ""; } catch (e) {}
 
