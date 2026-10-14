@@ -236,6 +236,40 @@ void startDaemon(Int port) {
         }
     }
 
+    app.post("/api/room/hold") {
+        log.info("REQ POST /api/room/hold")
+        if (authorized() == false) {
+            return unauthorizedJson()
+        }
+        try {
+            var req = json.decode<RoomRequest>(body())
+            return roomHold(roomsDir(), req.room(), req.user())
+        } catch (Exception e) {
+            var msg = e.getMessage()
+            if (msg == null) {
+                msg = "erro desconhecido"
+            }
+            return "{\"error\":" + json.encode(msg) + "}"
+        }
+    }
+
+    app.post("/api/room/release") {
+        log.info("REQ POST /api/room/release")
+        if (authorized() == false) {
+            return unauthorizedJson()
+        }
+        try {
+            var req = json.decode<RoomRequest>(body())
+            return roomRelease(roomsDir(), req.room(), req.user())
+        } catch (Exception e) {
+            var msg = e.getMessage()
+            if (msg == null) {
+                msg = "erro desconhecido"
+            }
+            return "{\"error\":" + json.encode(msg) + "}"
+        }
+    }
+
     app.post("/api/run") {
         log.info("REQ POST /api/run")
         if (authorized() == false) {
@@ -434,7 +468,7 @@ Bool validRoomId(String id) {
 }
 
 record RoomUser(String user, Long seen)
-record RoomState(String code, String updatedBy, Long updatedAt, List<RoomUser> users)
+record RoomState(String code, String updatedBy, Long updatedAt, List<RoomUser> users, String holder)
 record RoomRequest(String room, String user, String code)
 
 String roomPath(String dir, String id) {
@@ -463,6 +497,14 @@ List<RoomUser> touchUser(List<RoomUser> users, String u, Long now) {
     return out
 }
 
+String holderOf(RoomState st) {
+    var h = st.holder()
+    if (h == null) {
+        return ""
+    }
+    return h
+}
+
 String roomPush(String dir, String id, String rawUser, String code) {
     if (validRoomId(id) == false) {
         return "{\"error\":\"sala invalida (a-z, 0-9, -, max 32)\"}"
@@ -477,18 +519,104 @@ String roomPush(String dir, String id, String rawUser, String code) {
     }
     var now = time.now()
     var users = listOf<RoomUser>()
+    var holder = ""
     var prev = File(roomPath(dir, id)).readText()
     if (prev != null && prev != "") {
         try {
             var st = json.decode<RoomState>(prev)
             users = st.users()
+            holder = holderOf(st)
         } catch (Exception e) {
         }
     }
     users = touchUser(users, u, now)
+    if (holder != "" && holder != u) {
+        return "{\"error\":\"piloto é " + holder + "\"}"
+    }
+    if (holder == "") {
+        holder = u
+    }
     var d = Directory(dir)
     d.createDirectories()
-    File(roomPath(dir, id)).writeText(json.encode(RoomState(c, u, now, users)))
+    File(roomPath(dir, id)).writeText(json.encode(RoomState(c, u, now, users, holder)))
+    return roomStateJson(dir, id)
+}
+
+Bool holderStale(List<RoomUser> users, String h, Long now) {
+    var i = 0
+    while (i < users.size()) {
+        var r = users.get(i)
+        if (r.user() == h) {
+            if (now - r.seen() > 60000) {
+                return true
+            }
+            return false
+        }
+        i = i + 1
+    }
+    return true
+}
+
+String roomHold(String dir, String id, String rawUser) {
+    if (validRoomId(id) == false) {
+        return "{\"error\":\"sala invalida (a-z, 0-9, -, max 32)\"}"
+    }
+    var u = displayUser(rawUser)
+    var now = time.now()
+    var code = ""
+    var by = ""
+    var holder = ""
+    var users = listOf<RoomUser>()
+    var prev = File(roomPath(dir, id)).readText()
+    if (prev != null && prev != "") {
+        try {
+            var st = json.decode<RoomState>(prev)
+            code = st.code()
+            by = st.updatedBy()
+            users = st.users()
+            holder = holderOf(st)
+        } catch (Exception e) {
+        }
+    }
+    if (holder != "" && holder != u && holderStale(users, holder, now) == false) {
+        return "{\"error\":\"piloto é " + holder + "\"}"
+    }
+    holder = u
+    users = touchUser(users, u, now)
+    var d = Directory(dir)
+    d.createDirectories()
+    File(roomPath(dir, id)).writeText(json.encode(RoomState(code, by, now, users, holder)))
+    return roomStateJson(dir, id)
+}
+
+String roomRelease(String dir, String id, String rawUser) {
+    if (validRoomId(id) == false) {
+        return "{\"error\":\"sala invalida (a-z, 0-9, -, max 32)\"}"
+    }
+    var u = displayUser(rawUser)
+    var now = time.now()
+    var code = ""
+    var by = ""
+    var holder = ""
+    var users = listOf<RoomUser>()
+    var prev = File(roomPath(dir, id)).readText()
+    if (prev != null && prev != "") {
+        try {
+            var st = json.decode<RoomState>(prev)
+            code = st.code()
+            by = st.updatedBy()
+            users = st.users()
+            holder = holderOf(st)
+        } catch (Exception e) {
+        }
+    }
+    if (holder == u) {
+        holder = ""
+    }
+    users = touchUser(users, u, now)
+    var d = Directory(dir)
+    d.createDirectories()
+    File(roomPath(dir, id)).writeText(json.encode(RoomState(code, by, now, users, holder)))
     return roomStateJson(dir, id)
 }
 
@@ -514,6 +642,7 @@ String roomTouch(String dir, String id, String rawUser) {
     var now = time.now()
     var code = ""
     var by = ""
+    var holder = ""
     var users = listOf<RoomUser>()
     var prev = File(roomPath(dir, id)).readText()
     if (prev != null && prev != "") {
@@ -522,12 +651,13 @@ String roomTouch(String dir, String id, String rawUser) {
             code = st.code()
             by = st.updatedBy()
             users = st.users()
+            holder = holderOf(st)
         } catch (Exception e) {
         }
     }
     users = touchUser(users, u, now)
     var d = Directory(dir)
     d.createDirectories()
-    File(roomPath(dir, id)).writeText(json.encode(RoomState(code, by, now, users)))
+    File(roomPath(dir, id)).writeText(json.encode(RoomState(code, by, now, users, holder)))
     return roomStateJson(dir, id)
 }

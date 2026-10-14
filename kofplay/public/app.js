@@ -277,6 +277,27 @@
             var names = (d.users || []).map(function (u) { return u.user; });
             var label = roomId + (names.length ? ": " + names.join(", ") : " (nova sala — criada!)");
             $("presenceLine").textContent = label;
+            var holder = d.holder || "";
+            var me = displayName();
+            var hl = $("holderLine");
+            var holdBtn = $("holdBtn");
+            var relBtn = $("releaseBtn");
+            if (!holder) {
+                hl.textContent = "sem piloto — quem enviar código assume";
+                holdBtn.classList.remove("hidden");
+                relBtn.classList.add("hidden");
+                codeArea.readOnly = false;
+            } else if (holder === me) {
+                hl.textContent = "✈️ você está pilotando";
+                holdBtn.classList.add("hidden");
+                relBtn.classList.remove("hidden");
+                codeArea.readOnly = false;
+            } else {
+                hl.textContent = "✈️ " + holder + " pilotando";
+                holdBtn.classList.remove("hidden");
+                relBtn.classList.add("hidden");
+                codeArea.readOnly = true;
+            }
             if (typeof d.code === "string" && d.updatedBy && d.updatedBy !== displayName()
                     && d.code !== roomSnapshot && codeArea.value === roomSnapshot) {
                 var s = codeArea.selectionStart, e = codeArea.selectionEnd;
@@ -301,7 +322,7 @@
     function roomPush() {
         if (!roomId) { return; }
         post("/api/room/push", { room: roomId, user: displayName(), code: codeArea.value }).then(function (d) {
-            if (!d.error) { roomSnapshot = codeArea.value; }
+            if (!d.error) { roomSnapshot = codeArea.value; } else { roomPoll(); }
         }).catch(function () {});
     }
 
@@ -316,7 +337,16 @@
         var v = ($("roomInput").value || "").trim().toLowerCase();
         roomId = v;
         roomSnapshot = null;
+        codeArea.readOnly = false;
         if (roomId) { roomPoll(); }
+    });
+    $("holdBtn").addEventListener("click", function () {
+        if (!roomId) { return; }
+        post("/api/room/hold", { room: roomId, user: displayName() }).then(function () { roomPoll(); }).catch(function () {});
+    });
+    $("releaseBtn").addEventListener("click", function () {
+        if (!roomId) { return; }
+        post("/api/room/release", { room: roomId, user: displayName() }).then(function () { roomPoll(); }).catch(function () {});
     });
     $("roomSyncBtn").addEventListener("click", function () {
         if (!roomId) { return; }

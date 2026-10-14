@@ -88,6 +88,18 @@ curl -s -X POST localhost:8081/api/room/state -H 'Content-Type: application/json
   versão alheia (poll 1,5s) preservando o cursor quando o editor está limpo
   (senão mostra o botão ↻).
 
+## Pilotagem (sem OT, sem clobber)
+
+Só o piloto escreve: `push` de outro usuário é recusado (`piloto é X`) e o
+editor dele fica readonly. Primeiro push assume automaticamente.
+
+```bash
+curl -s -X POST localhost:8081/api/room/hold -H 'Content-Type: application/json' \
+  -d '{"room":"turma-1","user":"beto"}'       # assume (livre, seu ou piloto idle >60s)
+curl -s -X POST localhost:8081/api/room/release -H 'Content-Type: application/json' \
+  -d '{"room":"turma-1","user":"ana"}'        # libera (só o próprio piloto)
+```
+
 ## Auth
 
 Com `kofplay.api-key` configurada, `/api/run` e `/api/submit` exigem header

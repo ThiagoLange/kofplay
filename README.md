@@ -16,7 +16,8 @@ verdade** (nada de mock: erros vêm com os códigos amigáveis da linguagem).
 - 👥 **Turma (até 5+ pessoas)**: rode na rede (`./run.sh` já escuta em todas
   as interfaces — ex.: `http://192.168.0.12:8081`), proteja com
   `kofplay.api-key`, cada um põe o nome e vê o **ranking**; entrando na mesma
-  **sala**, o código é compartilhado ao vivo (polling, sem clobber).
+  **sala**, o código é compartilhado ao vivo (polling, sem clobber) e a
+  **pilotagem** decide quem escreve (✈️ assumir/liberar, expira em 60s idle).
 
 ## Instalação
 
