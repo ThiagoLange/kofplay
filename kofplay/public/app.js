@@ -7,6 +7,15 @@
     var lessons = [];
     var current = null;
     var lang = "kof";
+    var roomId = "";
+    var roomSnapshot = null;
+    var pushTimer = null;
+
+    function displayName() {
+        var v = "";
+        try { v = ($("userInput").value || "").trim(); } catch (e) {}
+        return v;
+    }
     var codeArea = $("codeArea");
     var gutter = $("gutter");
     var outputBox = $("outputBox");
@@ -155,7 +164,7 @@
         outputBox.classList.remove("is-error");
         setBadge("running…", "warn");
         $("runBtn").disabled = true;
-        post("/api/run", { code: codeArea.value, language: lang }).then(function (d) {
+        post("/api/run", { code: codeArea.value, language: lang, user: displayName() }).then(function (d) {
             if (d.exitCode === 0) {
                 outputBox.textContent = d.stdout || "(sem saída)";
                 setBadge("SUCCESS", "ok");
@@ -180,7 +189,7 @@
         $("submitBtn").disabled = true;
         var v = $("verdictBox");
         v.classList.add("hidden");
-        post("/api/submit", { lessonId: current.id, code: codeArea.value, language: lang }).then(function (d) {
+        post("/api/submit", { lessonId: current.id, code: codeArea.value, language: lang, user: displayName() }).then(function (d) {
             v.classList.remove("hidden");
             if (d.passed) {
                 var first = store.addXp(d.xpAwarded, current.id);
@@ -235,6 +244,97 @@
     $("langKofBtn").addEventListener("click", function () { setLang("kof"); });
     $("langPtkfBtn").addEventListener("click", function () { setLang("portukof"); });
     setLang("kof");
+
+    function refreshRanking() {
+        fetch("/api/ranking", { headers: apiHeaders() }).then(function (r) { return r.json(); }).then(function (d) {
+            var box = $("rankList");
+            box.innerHTML = "";
+            (d.users || []).slice(0, 5).forEach(function (u) {
+                var row = document.createElement("div");
+                row.className = "rank-row";
+                var a = document.createElement("span");
+                a.textContent = u.user;
+                var b = document.createElement("span");
+                b.className = "mono";
+                b.textContent = u.xp + " XP · " + (u.lessons || []).length;
+                row.appendChild(a);
+                row.appendChild(b);
+                box.appendChild(row);
+            });
+            (d.feed || []).slice(-4).reverse().forEach(function (f) {
+                var row = document.createElement("div");
+                row.className = "rank-feed";
+                row.textContent = f.user + (f.passed ? " ✅ " : " ❌ ") + f.lesson + " (+" + f.xp + ")";
+                box.appendChild(row);
+            });
+        }).catch(function () {});
+    }
+
+    function roomPoll() {
+        if (!roomId) { return; }
+        post("/api/room/presence", { room: roomId, user: displayName() }).then(function (d) {
+            if (d.error) { return; }
+            var names = (d.users || []).map(function (u) { return u.user; });
+            $("presenceLine").textContent = names.length ? names.join(", ") : "";
+            if (typeof d.code === "string" && d.updatedBy && d.updatedBy !== displayName()
+                    && d.code !== roomSnapshot && codeArea.value === roomSnapshot) {
+                codeArea.value = d.code;
+                roomSnapshot = d.code;
+                refreshGutter();
+            }
+            var syncBtn = $("roomSyncBtn");
+            if (typeof d.code === "string" && d.updatedBy && d.updatedBy !== displayName()
+                    && d.code !== codeArea.value) {
+                syncBtn.classList.remove("hidden");
+            } else {
+                syncBtn.classList.add("hidden");
+            }
+        }).catch(function () {});
+    }
+
+    function roomPush() {
+        if (!roomId) { return; }
+        post("/api/room/push", { room: roomId, user: displayName(), code: codeArea.value }).then(function (d) {
+            if (!d.error) { roomSnapshot = codeArea.value; }
+        }).catch(function () {});
+    }
+
+    function schedulePush() {
+        if (pushTimer) { clearTimeout(pushTimer); }
+        pushTimer = setTimeout(function () {
+            if (roomId && codeArea.value !== roomSnapshot) { roomPush(); }
+        }, 2500);
+    }
+
+    $("roomJoinBtn").addEventListener("click", function () {
+        var v = ($("roomInput").value || "").trim().toLowerCase();
+        roomId = v;
+        roomSnapshot = null;
+        if (roomId) { roomPoll(); }
+    });
+    $("roomSyncBtn").addEventListener("click", function () {
+        if (!roomId) { return; }
+        post("/api/room/state", { room: roomId }).then(function (d) {
+            if (typeof d.code === "string") {
+                codeArea.value = d.code;
+                roomSnapshot = d.code;
+                refreshGutter();
+                $("roomSyncBtn").classList.add("hidden");
+            }
+        }).catch(function () {});
+    });
+    codeArea.addEventListener("input", function () { schedulePush(); });
+    try { $("userInput").value = localStorage.getItem("kofplay_user") || ""; } catch (e) {}
+    $("userInput").addEventListener("change", function () {
+        try { localStorage.setItem("kofplay_user", $("userInput").value); } catch (e) {}
+    });
+    try { $("roomInput").value = localStorage.getItem("kofplay_room") || ""; } catch (e) {}
+    $("roomInput").addEventListener("change", function () {
+        try { localStorage.setItem("kofplay_room", $("roomInput").value); } catch (e) {}
+    });
+    setInterval(refreshRanking, 10000);
+    setInterval(roomPoll, 4000);
+    refreshRanking();
     $("apiKeyInput").addEventListener("change", function () {
         try { localStorage.setItem("kofplay_api_key", $("apiKeyInput").value); } catch (e) {}
     });

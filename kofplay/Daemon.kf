@@ -7,17 +7,17 @@
 
 import java.lang.Exception
 
-record RunRequest(String code, String language)
-record SubmitRequest(String lessonId, String code, String language)
+record RunRequest(String code, String language, String user)
+record SubmitRequest(String lessonId, String code, String language, String user)
 
 String submissionsPath() {
     return config.str("kofplay.history-file", "submissions.jsonl")
 }
 
-void logSubmit(String lessonId, Bool passed, Int xp) {
+void logSubmit(String lessonId, String user, Bool passed, Int xp) {
     var p = Path(submissionsPath())
     var xpStr = "" + xp
-    var line = "{\"lesson\":\"" + lessonId + "\",\"passed\":" + boolStrOf(passed) + ",\"xp\":" + xpStr + "}"
+    var line = "{\"lesson\":\"" + lessonId + "\",\"user\":\"" + user + "\",\"passed\":" + boolStrOf(passed) + ",\"xp\":" + xpStr + "}"
     if (p.exists()) {
         p.appendText(line + "\n")
     } else {
@@ -121,7 +121,7 @@ String healthJson(String portStr) {
     return "{\"status\":\"UP\",\"service\":\"kofplay\",\"port\":" + portStr + ",\"timeout_seconds\":" + timeoutStr + ",\"auth_required\":" + auth + ",\"kof_version\":" + json.encode(kofVersion()) + "}"
 }
 
-String submitJson(String lessonId, String code, String language) {
+String submitJson(String lessonId, String code, String language, String rawUser) {
     if (lessonExists(lessonId) == false) {
         return "{\"passed\":false,\"xpAwarded\":0,\"error\":\"licao desconhecida: " + lessonId + "\"}"
     }
@@ -138,7 +138,7 @@ String submitJson(String lessonId, String code, String language) {
         xpAwarded = lesson.xp()
     }
     var xpStr = "" + xpAwarded
-    logSubmit(lessonId, passed, xpAwarded)
+    logSubmit(lessonId, displayUser(rawUser), passed, xpAwarded)
     return "{\"passed\":" + boolStrOf(passed) + ",\"xpAwarded\":" + xpStr + ",\"expected\":" + json.encode(lesson.expected()) + ",\"got\":" + json.encode(result.stdout()) + ",\"run\":" + json.encode(result) + "}"
 }
 
@@ -177,6 +177,65 @@ void startDaemon(Int port) {
         return lessonsJson()
     }
 
+    app.get("/api/ranking") {
+        log.info("REQ GET /api/ranking")
+        if (authorized() == false) {
+            return unauthorizedJson()
+        }
+        return rankingJson()
+    }
+
+    app.post("/api/room/state") {
+        log.info("REQ POST /api/room/state")
+        if (authorized() == false) {
+            return unauthorizedJson()
+        }
+        try {
+            var req = json.decode<RoomRequest>(body())
+            return roomStateJson(roomsDir(), req.room())
+        } catch (Exception e) {
+            var msg = e.getMessage()
+            if (msg == null) {
+                msg = "erro desconhecido"
+            }
+            return "{\"error\":" + json.encode(msg) + "}"
+        }
+    }
+
+    app.post("/api/room/push") {
+        log.info("REQ POST /api/room/push")
+        if (authorized() == false) {
+            return unauthorizedJson()
+        }
+        try {
+            var req = json.decode<RoomRequest>(body())
+            return roomPush(roomsDir(), req.room(), req.user(), req.code())
+        } catch (Exception e) {
+            var msg = e.getMessage()
+            if (msg == null) {
+                msg = "erro desconhecido"
+            }
+            return "{\"error\":" + json.encode(msg) + "}"
+        }
+    }
+
+    app.post("/api/room/presence") {
+        log.info("REQ POST /api/room/presence")
+        if (authorized() == false) {
+            return unauthorizedJson()
+        }
+        try {
+            var req = json.decode<RoomRequest>(body())
+            return roomTouch(roomsDir(), req.room(), req.user())
+        } catch (Exception e) {
+            var msg = e.getMessage()
+            if (msg == null) {
+                msg = "erro desconhecido"
+            }
+            return "{\"error\":" + json.encode(msg) + "}"
+        }
+    }
+
     app.post("/api/run") {
         log.info("REQ POST /api/run")
         if (authorized() == false) {
@@ -202,7 +261,7 @@ void startDaemon(Int port) {
         }
         try {
             var req = json.decode<SubmitRequest>(body())
-            return submitJson(req.lessonId(), req.code(), req.language())
+            return submitJson(req.lessonId(), req.code(), req.language(), req.user())
         } catch (Exception e) {
             var msg = e.getMessage()
             if (msg == null) {
@@ -213,4 +272,262 @@ void startDaemon(Int port) {
     }
 
     app.listen(port)
+}
+
+// ---- turma: ranking + salas (opcoes 1 e 2) ----
+
+String cleanUser(String u) {
+    var sb = ""
+    var i = 0
+    while (i < u.length && sb.length < 24) {
+        var c = u.charAt(i)
+        if ((c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c == 32 || c == 45 || c == 95) {
+            sb = sb + u.substring(i, i + 1)
+        }
+        i = i + 1
+    }
+    return sb
+}
+
+String displayUser(String u) {
+    if (u == null) {
+        return "anon"
+    }
+    var s = cleanUser(u)
+    if (s == "") {
+        return "anon"
+    }
+    return s
+}
+
+List<String> splitLines(String s) {
+    var out = listOf<String>()
+    var start = 0
+    var n = s.length
+    var i = 0
+    while (i < n) {
+        if (s.charAt(i) == 10) {
+            out.add(s.substring(start, i))
+            start = i + 1
+        }
+        i = i + 1
+    }
+    out.add(s.substring(start, n))
+    return out
+}
+
+record Audit(String lesson, String user, Bool passed, Int xp)
+record RankUser(String user, Int xp, List<String> lessons)
+record FeedItem(String user, String lesson, Bool passed, Int xp)
+record RankBoard(List<RankUser> users, List<FeedItem> feed)
+
+Int indexOfRankUser(List<RankUser> users, String u) {
+    var i = 0
+    while (i < users.size()) {
+        if (users.get(i).user() == u) {
+            return i
+        }
+        i = i + 1
+    }
+    return -1
+}
+
+Bool containsStr(List<String> xs, String v) {
+    var i = 0
+    while (i < xs.size()) {
+        if (xs.get(i) == v) {
+            return true
+        }
+        i = i + 1
+    }
+    return false
+}
+
+String rankingJson() {
+    var users = listOf<RankUser>()
+    var feed = listOf<FeedItem>()
+    var prev = File(submissionsPath()).readText()
+    if (prev == null) {
+        return json.encode(RankBoard(users, feed))
+    }
+    var lines = splitLines(prev)
+    var i = 0
+    while (i < lines.size()) {
+        var line = lines.get(i)
+        if (line.length > 0) {
+            try {
+                var a = json.decode<Audit>(line)
+                var u = displayUser(a.user())
+                var k = indexOfRankUser(users, u)
+                if (k == -1) {
+                    users.add(RankUser(u, 0, listOf<String>()))
+                    k = users.size() - 1
+                }
+                var ru = users.get(k)
+                var total = ru.xp() + a.xp()
+                var ls = ru.lessons()
+                if (a.passed() && containsStr(ls, a.lesson()) == false) {
+                    var nl = listOf<String>()
+                    var q = 0
+                    while (q < ls.size()) {
+                        nl.add(ls.get(q))
+                        q = q + 1
+                    }
+                    nl.add(a.lesson())
+                    ls = nl
+                }
+                users.set(k, RankUser(u, total, ls))
+                feed.add(FeedItem(u, a.lesson(), a.passed(), a.xp()))
+            } catch (Exception e) {
+            }
+        }
+        i = i + 1
+    }
+    var start = 0
+    if (feed.size() > 20) {
+        start = feed.size() - 20
+    }
+    var tail = listOf<FeedItem>()
+    var t = start
+    while (t < feed.size()) {
+        tail.add(feed.get(t))
+        t = t + 1
+    }
+    var a2 = 0
+    while (a2 < users.size()) {
+        var b = a2 + 1
+        while (b < users.size()) {
+            if (users.get(b).xp() > users.get(a2).xp()) {
+                var tmp = users.get(a2)
+                users.set(a2, users.get(b))
+                users.set(b, tmp)
+            }
+            b = b + 1
+        }
+        a2 = a2 + 1
+    }
+    return json.encode(RankBoard(users, tail))
+}
+
+String roomsDir() {
+    return config.str("kofplay.rooms-dir", "rooms")
+}
+
+Bool validRoomId(String id) {
+    if (id == null) {
+        return false
+    }
+    var n = id.length
+    if (n == 0 || n > 32) {
+        return false
+    }
+    var i = 0
+    while (i < n) {
+        var c = id.charAt(i)
+        if ((c >= 48 && c <= 57) || (c >= 97 && c <= 122) || c == 45) {
+        } else {
+            return false
+        }
+        i = i + 1
+    }
+    return true
+}
+
+record RoomUser(String user, Long seen)
+record RoomState(String code, String updatedBy, Long updatedAt, List<RoomUser> users)
+record RoomRequest(String room, String user, String code)
+
+String roomPath(String dir, String id) {
+    return dir + "/" + id + ".json"
+}
+
+List<RoomUser> touchUser(List<RoomUser> users, String u, Long now) {
+    var out = listOf<RoomUser>()
+    var found = 0
+    var i = 0
+    while (i < users.size()) {
+        var r = users.get(i)
+        if (r.user() == u) {
+            out.add(RoomUser(u, now))
+            found = 1
+        } else {
+            if (now - r.seen() < 120000) {
+                out.add(r)
+            }
+        }
+        i = i + 1
+    }
+    if (found == 0) {
+        out.add(RoomUser(u, now))
+    }
+    return out
+}
+
+String roomPush(String dir, String id, String rawUser, String code) {
+    if (validRoomId(id) == false) {
+        return "{\"error\":\"sala invalida (a-z, 0-9, -, max 32)\"}"
+    }
+    var u = displayUser(rawUser)
+    var c = code
+    if (c == null) {
+        c = ""
+    }
+    if (c.length > 65536) {
+        return "{\"error\":\"codigo excede o limite de 64KB\"}"
+    }
+    var now = time.now()
+    var users = listOf<RoomUser>()
+    var prev = File(roomPath(dir, id)).readText()
+    if (prev != null && prev != "") {
+        try {
+            var st = json.decode<RoomState>(prev)
+            users = st.users()
+        } catch (Exception e) {
+        }
+    }
+    users = touchUser(users, u, now)
+    var d = Directory(dir)
+    d.createDirectories()
+    File(roomPath(dir, id)).writeText(json.encode(RoomState(c, u, now, users)))
+    return roomStateJson(dir, id)
+}
+
+String roomStateJson(String dir, String id) {
+    if (validRoomId(id) == false) {
+        return "{\"error\":\"sala invalida (a-z, 0-9, -, max 32)\"}"
+    }
+    var t = File(roomPath(dir, id)).readText()
+    if (t == null) {
+        return "{\"code\":\"\",\"updatedBy\":\"\",\"updatedAt\":0,\"users\":[]}"
+    }
+    if (t == "") {
+        return "{\"code\":\"\",\"updatedBy\":\"\",\"updatedAt\":0,\"users\":[]}"
+    }
+    return t
+}
+
+String roomTouch(String dir, String id, String rawUser) {
+    if (validRoomId(id) == false) {
+        return "{\"error\":\"sala invalida (a-z, 0-9, -, max 32)\"}"
+    }
+    var u = displayUser(rawUser)
+    var now = time.now()
+    var code = ""
+    var by = ""
+    var users = listOf<RoomUser>()
+    var prev = File(roomPath(dir, id)).readText()
+    if (prev != null && prev != "") {
+        try {
+            var st = json.decode<RoomState>(prev)
+            code = st.code()
+            by = st.updatedBy()
+            users = st.users()
+        } catch (Exception e) {
+        }
+    }
+    users = touchUser(users, u, now)
+    var d = Directory(dir)
+    d.createDirectories()
+    File(roomPath(dir, id)).writeText(json.encode(RoomState(code, by, now, users)))
+    return roomStateJson(dir, id)
 }

@@ -56,6 +56,36 @@ curl -s -X POST localhost:8081/api/submit -H 'Content-Type: application/json' \
 - Todo submit é auditado em `submissions.jsonl` (`{lesson, passed, xp}`).
 - `language` opcional (`"portukof"` para a variante em português; o `expected`
   é o mesmo nas duas línguas). A UI tem o seletor Kof | PortuKof no editor.
+- `user` opcional (nome de exibição; ausente = `anon`, saneado para
+  `[a-zA-Z0-9 _-]` com máx 24). Vai para a auditoria e o ranking.
+
+## GET /api/ranking
+
+```bash
+curl -s localhost:8081/api/ranking
+# {"users":[{"user":"mel","xp":120,"lessons":["hello-kof",...]}],"feed":[...]}
+```
+
+- Agrega `submissions.jsonl` por usuário (soma XP, lições únicas com passou,
+  ordem decrescente de XP) + últimas 20 entradas (feed).
+- Linhas antigas sem `user` contam como `anon` (compatível).
+
+## Salas (código compartilhado)
+
+```bash
+curl -s -X POST localhost:8081/api/room/push -H 'Content-Type: application/json' \
+  -d '{"room":"turma-1","user":"mel","code":"main() {\n    println(1)\n}\n"}'
+curl -s -X POST localhost:8081/api/room/presence -H 'Content-Type: application/json' \
+  -d '{"room":"turma-1","user":"jo"}'
+curl -s -X POST localhost:8081/api/room/state -H 'Content-Type: application/json' \
+  -d '{"room":"turma-1"}'
+```
+
+- `room`: `a-z, 0-9, -`, máx 32 (traversal recusado com erro).
+- `push` grava código (máx 64KB) + presença; `presence` só marca presença
+  (prune de inativos > 120s); `state` é leitura. Arquivos em `rooms/<id>.json`
+  (gitignored). A UI entra na sala, envia o código após 2,5s parado e adota a
+  versão alheia sozinha quando o editor está limpo (senão mostra o botão ↻).
 
 ## Auth
 

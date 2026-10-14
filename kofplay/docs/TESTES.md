@@ -3,8 +3,8 @@
 ## 1. Unitários (`kof test`)
 
 ```bash
-kof test kofplay/Lessons.kf   # 4 testes
-kof test kofplay/Runner.kf     # 4 testes
+kof test kofplay/Lessons.kf   # 6 testes
+kof test kofplay/Runner.kf     # 7 testes
 ```
 
 | Arquivo | Teste | Resultado |
@@ -13,10 +13,15 @@ kof test kofplay/Runner.kf     # 4 testes
 | Lessons | ids são únicos | PASS ✅ |
 | Lessons | lookup por id + missing | PASS ✅ |
 | Lessons | todo expected termina com `\n` | PASS ✅ |
+| Lessons | toda lição tem variante portukof | PASS ✅ |
+| Lessons | toda lição tem variante portukof | PASS ✅ |
 | Runner | classifyError (NONE/TIMEOUT/COMPILE/RUNTIME) | PASS ✅ |
 | Runner | rejeita código vazio | PASS ✅ |
 | Runner | hello funciona (exit 0, `Oi\n`) | PASS ✅ |
 | Runner | erro de compilação → COMPILE | PASS ✅ |
+| Runner | normalizeLang + extOf (kof/portukof/default) | PASS ✅ |
+| Runner | runKofLang executa `.ptkf` | PASS ✅ |
+| Runner | runKofLang sem language usa kof | PASS ✅ |
 
 ## 2. E2E (servidor em 8081)
 
@@ -33,7 +38,11 @@ kof test kofplay/Runner.kf     # 4 testes
 | 10 | submit com resposta errada (`got 1` vs `expected 42`) | `passed:false`, diff no output ✅ |
 | 11 | submit lição inexistente | `licao desconhecida` ✅ |
 | 12 | `GET /` como `text/html` (renderiza no navegador) | ✅ |
-| 13 | `submissions.jsonl` com 7 linhas auditadas | ✅ |
+| 13 | `submissions.jsonl` com linhas auditadas (+`user`) | ✅ |
+| 16 | `GET /api/ranking` agrega XP/lições por usuário (+feed) | ✅ |
+| 17 | `POST /api/room/push|presence|state` (round-trip + 2 presentes) | ✅ |
+| 18 | Sala inválida (`../x`, maiúscula) recusada | ✅ |
+| 19 | `user` malicioso saneado (`a<b>c"d` → `abcd`) | ✅ |
 
 ## 3. UI v2 autocontida (sem CDN, mesmo padrão do KofBox)
 

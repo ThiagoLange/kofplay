@@ -3,3 +3,4 @@ kofplay/submissions.jsonl
 *.class
 target/
 .kof/
+kofplay/rooms/

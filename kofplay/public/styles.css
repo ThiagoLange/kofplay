@@ -261,6 +261,24 @@ body {
     width: 180px;
 }
 #apiKeyInput:focus { outline: none; border-color: var(--accent); }
+.turma-card { display: flex; flex-direction: column; gap: 8px; }
+.text-input {
+    background: var(--bg-soft);
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-family: var(--mono);
+    width: 100%;
+    box-sizing: border-box;
+}
+.text-input:focus { outline: none; border-color: var(--accent); }
+.room-row { display: flex; gap: 8px; }
+.room-row .text-input { flex: 1; }
+.rank-list { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.rank-row { display: flex; justify-content: space-between; }
+.rank-feed { color: var(--muted); font-size: 11px; }
 
 .note {
     margin-top: 12px;
