@@ -12,7 +12,23 @@ Daemon.kf (kof.web, JVM, virtual thread por conexão)
   GET  /api/lessons   → lessonsJson() (array direto, sem montagem manual)
   POST /api/run       → runKof(code) → RunResult JSON
   POST /api/submit    → findLesson + runKof + compara stdout == expected + logSubmit
+  GET  /api/ranking   → agrega submissions.jsonl por usuário (XP + lições + feed)
+  POST /api/room/state|push|presence → código compartilhado em rooms/<id>.json
 ```
+
+## Turma (ranking + salas)
+
+- **Identidade**: `user` opcional em run/submit (saneado `[a-zA-Z0-9 _-]`/24,
+  ausente = `anon`); vai para a auditoria. Linhas antigas sem `user` contam
+  como `anon` — compatível para trás.
+- **Ranking**: `rankingJson()` relê o audit, soma XP, lições únicas com passou,
+  ordena desc, feed das últimas 20. Sem estado em memória (reinício perde nada).
+- **Salas**: `rooms/<id>.json` (`{code, updatedBy, updatedAt, users[{user,seen}]}`),
+  id validado (`a-z0-9-`, ≤32, anti-traversal), código ≤64KB, presença com
+  prune de inativos >120s. `push` grava+cora, `presence` marca+devolve estado,
+  `state` é leitura. Concorrência: last-writer-wins por arquivo (ok p/ ≤5).
+- **UI**: nome persistido, ranking (poll 10s), sala com push após 2,5s parado;
+  adota versão alheia sozinha só com editor limpo (botão ↻ senão).
 
 ## Runner (execução isolada)
 

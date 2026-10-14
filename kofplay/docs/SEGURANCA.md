@@ -17,8 +17,18 @@
 
 - Temp UUID + delete pós-execução; `timeout Ns` (configurável, padrão 25s).
 - Limite 64KB + rejeição de vazio; `writeText` checado.
-- API key opcional para `/api/run` e `/api/submit`.
+- API key opcional para `/api/run` e `/api/submit` (e `/api/ranking`, `/api/room/*`).
 - Auditoria de submits em `submissions.jsonl`.
+- Salas: id validado (`a-z0-9-`, ≤32 — sem traversal para `rooms/`), código ≤64KB,
+  nome saneado (sem quebra de JSON); arquivos de sala em `rooms/` (gitignored).
+
+## Turma em rede local (até ~5 pessoas)
+
+- O daemon escuta em todas as interfaces: `http://<IP>:8081` na mesma rede.
+- Para turma: suba com `kofplay.api-key` e distribua a chave + o nome da sala.
+- 5 × JVM simultâneas pesam (~1–3s CPU cada); com 25s de timeout o pior caso
+  enfileira no SO. Para mais gente: worker com fila (v2 acima).
+- Nunca exponha na internet sem proxy com auth + TLS + rate limit.
 
 ## v2
 
