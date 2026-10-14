@@ -275,7 +275,8 @@
         post("/api/room/presence", { room: roomId, user: displayName() }).then(function (d) {
             if (d.error) { return; }
             var names = (d.users || []).map(function (u) { return u.user; });
-            $("presenceLine").textContent = names.length ? names.join(", ") : "";
+            var label = roomId + (names.length ? ": " + names.join(", ") : " (nova sala — criada!)");
+            $("presenceLine").textContent = label;
             if (typeof d.code === "string" && d.updatedBy && d.updatedBy !== displayName()
                     && d.code !== roomSnapshot && codeArea.value === roomSnapshot) {
                 codeArea.value = d.code;
