@@ -84,8 +84,9 @@ curl -s -X POST localhost:8081/api/room/state -H 'Content-Type: application/json
 - `room`: `a-z, 0-9, -`, máx 32 (traversal recusado com erro).
 - `push` grava código (máx 64KB) + presença; `presence` só marca presença
   (prune de inativos > 120s); `state` é leitura. Arquivos em `rooms/<id>.json`
-  (gitignored). A UI entra na sala, envia o código após 2,5s parado e adota a
-  versão alheia sozinha quando o editor está limpo (senão mostra o botão ↻).
+  (gitignored). A UI entra na sala, envia o código após 400ms parada e adota a
+  versão alheia (poll 1,5s) preservando o cursor quando o editor está limpo
+  (senão mostra o botão ↻).
 
 ## Auth
 

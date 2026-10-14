@@ -279,8 +279,13 @@
             $("presenceLine").textContent = label;
             if (typeof d.code === "string" && d.updatedBy && d.updatedBy !== displayName()
                     && d.code !== roomSnapshot && codeArea.value === roomSnapshot) {
+                var s = codeArea.selectionStart, e = codeArea.selectionEnd;
                 codeArea.value = d.code;
                 roomSnapshot = d.code;
+                try {
+                    codeArea.selectionStart = Math.min(s, d.code.length);
+                    codeArea.selectionEnd = Math.min(e, d.code.length);
+                } catch (ex) {}
                 refreshGutter();
             }
             var syncBtn = $("roomSyncBtn");
@@ -304,7 +309,7 @@
         if (pushTimer) { clearTimeout(pushTimer); }
         pushTimer = setTimeout(function () {
             if (roomId && codeArea.value !== roomSnapshot) { roomPush(); }
-        }, 2500);
+        }, 400);
     }
 
     $("roomJoinBtn").addEventListener("click", function () {
@@ -334,7 +339,7 @@
         try { localStorage.setItem("kofplay_room", $("roomInput").value); } catch (e) {}
     });
     setInterval(refreshRanking, 10000);
-    setInterval(roomPoll, 4000);
+    setInterval(roomPoll, 1500);
     refreshRanking();
     $("apiKeyInput").addEventListener("change", function () {
         try { localStorage.setItem("kofplay_api_key", $("apiKeyInput").value); } catch (e) {}
