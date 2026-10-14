@@ -25,8 +25,10 @@ kof test kofplay/Runner.kf     # 4 testes
 | 1 | `GET /api/health` (port, timeout 25, kof_version) | ✅ |
 | 2 | `GET /api/lessons` (30 lições, campos completos) | ✅ |
 | 3 | `POST /api/run` erro real (`SEM011` no stderr) | ✅ |
-| 4–9 | `POST /api/submit` com a `solution` das 6 lições originais | 6× PASS (10+15+20+25+30+50 XP) ✅ |
-| 14 | `POST /api/submit` com a `solution` das 13 lições novas | 13× PASS ✅ (if-else, switch, while, strings, classes, enums, mapas-sets, null-safe, exceptions, lambdas, arquivos, json, concorrencia) |
+| 4 | `POST /api/submit` com as 30 `solution` Kof | 30× PASS ✅ |
+| 5 | `POST /api/submit` com as 30 `solutionPtkf` (portukof) | 30× PASS ✅ |
+| 6 | `POST /api/submit` sem `language` (default kof) | PASS ✅ |
+| 7 | Runner isolado: `.kf` estranho em `/tmp` não quebra (subdir por run) | ✅ |
 | 15 | XP total do currículo (30 lições) | 810 XP | ✅ |
 | 10 | submit com resposta errada (`got 1` vs `expected 42`) | `passed:false`, diff no output ✅ |
 | 11 | submit lição inexistente | `licao desconhecida` ✅ |

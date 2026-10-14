@@ -16,9 +16,10 @@ Daemon.kf (kof.web, JVM, virtual thread por conexão)
 
 ## Runner (execução isolada)
 
-`/tmp/kofplay_<UUID>.kf` → `timeout Ns kof run <file>` → stdout/stderr via
+`/tmp/kofplay_<UUID>/prog.(kf|ptkf)` → `timeout Ns kof run <file>` → stdout/stderr via
 Scanner (lidos **antes** de `waitFor`) → classifica `errorKind` → deleta o temp.
-Cada execução é um processo `kof` fresco: compilação + JVM do zero (~1s a mais
+Subdir próprio por run: um `.kf` perdido em `/tmp` quebrava tudo (`PKG005`,
+o `kof run` compila o diretório). Cada execução é um processo `kof` fresco: compilação + JVM do zero (~1s a mais
 por run, aceitável para ensino; v2 pode manter daemon de compilação aquecido).
 
 ## Veredito
