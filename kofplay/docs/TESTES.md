@@ -9,7 +9,7 @@ kof test kofplay/Runner.kf     # 4 testes
 
 | Arquivo | Teste | Resultado |
 |---|---|---|
-| Lessons | catálogo tem 19 lições | PASS ✅ |
+| Lessons | catálogo tem 30 lições | PASS ✅ |
 | Lessons | ids são únicos | PASS ✅ |
 | Lessons | lookup por id + missing | PASS ✅ |
 | Lessons | todo expected termina com `\n` | PASS ✅ |
@@ -23,11 +23,11 @@ kof test kofplay/Runner.kf     # 4 testes
 | # | Caso | Resultado |
 |---|---|---|
 | 1 | `GET /api/health` (port, timeout 25, kof_version) | ✅ |
-| 2 | `GET /api/lessons` (19 lições, campos completos) | ✅ |
+| 2 | `GET /api/lessons` (30 lições, campos completos) | ✅ |
 | 3 | `POST /api/run` erro real (`SEM011` no stderr) | ✅ |
 | 4–9 | `POST /api/submit` com a `solution` das 6 lições originais | 6× PASS (10+15+20+25+30+50 XP) ✅ |
 | 14 | `POST /api/submit` com a `solution` das 13 lições novas | 13× PASS ✅ (if-else, switch, while, strings, classes, enums, mapas-sets, null-safe, exceptions, lambdas, arquivos, json, concorrencia) |
-| 15 | XP total do currículo (19 lições) | 460 XP | ✅ |
+| 15 | XP total do currículo (30 lições) | 810 XP | ✅ |
 | 10 | submit com resposta errada (`got 1` vs `expected 42`) | `passed:false`, diff no output ✅ |
 | 11 | submit lição inexistente | `licao desconhecida` ✅ |
 | 12 | `GET /` como `text/html` (renderiza no navegador) | ✅ |

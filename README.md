@@ -6,7 +6,7 @@ verdade** (nada de mock: erros vêm com os códigos amigáveis da linguagem).
 
 ## Como funciona
 
-- 📚 **19 lições em PT-BR** (460 XP): do `Olá, Kof!` ao FizzBuzz chefe final —
+- 📚 **30 lições em PT-BR** (810 XP, básico ao avançado): do `Olá, Kof!` ao FizzBuzz chefe final —
   cada uma em **Kof e PortuKof** (mesmo exercício, mesma saída; seletor no editor).
 - ▶️ **Editor no navegador** com Executar, Submeter, dicas e soluções progressivas.
 - ⚙️ **Backend em Kof puro** (`kof.web` + `json` + `kof.io`, zero Spring/Express):
@@ -52,7 +52,7 @@ curl -X POST localhost:8081/api/submit \
 ```
 kofplay/            # app (detalhes em kofplay/README.md)
 ├── Main.kf         # entrada + porta via config
-├── Lessons.kf      # catálogo das 19 lições
+├── Lessons.kf      # catálogo das 30 lições
 ├── Runner.kf       # execução isolada (UUID + timeout + classifica erro)
 ├── Daemon.kf       # rotas /, /api/health|lessons|run|submit
 ├── public/         # UI (editor, output, XP)
@@ -82,17 +82,19 @@ kof test Runner.kf    # 4 testes
 > O Runner precisa do binário `kof` no PATH do daemon (o `run.sh` garante).
 > Auth opcional: `kofplay.api-key` exige header `x-api-key` em `/api/run` e `/api/submit`.
 
-## Lições (19, PT-BR, 460 XP total)
+## Lições (30, PT-BR, 810 XP total)
 
-Básico: hello-kof (10) · variaveis (15) · if-else (15) · switch (15) · while (15) ·
-strings (15) · funcoes (20) · listas (30).
-Intermediário: classes (20) · enums (20) · mapas-sets (20) · null-safe (25) ·
-exceptions (25) · lambdas (30) · arquivos (30) · json (30) · records (25).
-Avançado: concorrencia/spawn (50) · fizzbuzz (50, chefe final).
+Básico (10): hello-kof (10) · variaveis (15) · if-else (15) · switch (15) · while (15) ·
+strings (15) · operadores (15) · tipos (15) · tabuada (15) · lista-get (15).
+Intermediário (12): funcoes (20) · records (25) · listas (30) · classes (20) · enums (20) ·
+mapas-sets (20) · null-safe (25) · exceptions (25) · lambdas (30) · arquivos (30) ·
+json (30) · recursao (30).
+Avançado (8): concorrencia/spawn (50) · fizzbuzz (50, chefe final) · primo (40) ·
+ordenar (50) · fibonacci (40) · mdc (40) · matriz-soma (50) · binario (40).
 
 ## Decisões técnicas
 
-- **Execução = compilador real**: `Runner.kf` grava `/tmp/kofplay_<UUID>.kf` e roda
+- **Execução = compilador real**: `Runner.kf` grava `/tmp/kofplay_<UUID>/prog.(kf|ptkf)` e roda
   `kof run` com `timeout` — o aluno vê diagnósticos idênticos aos do terminal.
 - **XP no cliente** (localStorage; anti-farm simples: XP só conta 1× por lição);
   servidor é autoridade do veredito e mantém auditoria (não commitada).

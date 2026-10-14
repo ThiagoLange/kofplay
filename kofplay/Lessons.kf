@@ -276,6 +276,160 @@ List<Lesson> allLessons() {
             "principal() {\n    para (var i = 1; i <= 15; i = i + 1) {\n        // TODO: FizzBuzz completo com escrevaln\n    }\n}\n",
             "Teste i % 15 primeiro (senão o 15 cai no Fizz). escrevaln(i) imprime número.",
             "principal() {\n    para (var i = 1; i <= 15; i = i + 1) {\n        se (i % 15 == 0) {\n            escrevaln(\"FizzBuzz\")\n        } senao {\n            se (i % 3 == 0) {\n                escrevaln(\"Fizz\")\n            } senao {\n                se (i % 5 == 0) {\n                    escrevaln(\"Buzz\")\n                } senao {\n                    escrevaln(i)\n                }\n            }\n        }\n    }\n}\n"
+        ),
+        Lesson(
+            "operadores",
+            "Operadores e lógica",
+            "Fácil",
+            15,
+            "Kof tem os operadores usuais: % (resto), * com precedência sobre +, comparações que devolvem Bool, && (e), ! (não). Imprima cada resultado.",
+            "main() {\n    // TODO: imprima 7 % 3, 2 + 3 * 4, 5 > 3, true && false, !(5 == 5)\n}\n",
+            "1\n14\ntrue\nfalse\nfalse\n",
+            "println(7 % 3); precedência: * antes de +.",
+            "main() {\n    println(7 % 3)\n    println(2 + 3 * 4)\n    println(5 > 3)\n    println(true && false)\n    println(!(5 == 5))\n}\n",
+            "principal() {\n    // TODO: imprima 7 % 3, 2 + 3 * 4, 5 > 3, verdadeiro && falso, !(5 == 5)\n}\n",
+            "escrevaln(7 % 3); precedência: * antes de +.",
+            "principal() {\n    escrevaln(7 % 3)\n    escrevaln(2 + 3 * 4)\n    escrevaln(5 > 3)\n    escrevaln(verdadeiro && falso)\n    escrevaln(!(5 == 5))\n}\n"
+        ),
+        Lesson(
+            "tipos",
+            "Tipos inferidos",
+            "Fácil",
+            15,
+            "Sem declarar tipo: 42 é Int, 3.5 é Double, \"texto\" é String, true é Bool. O compilador infere e o println mostra cada valor.",
+            "main() {\n    var a = 42\n    var b = 3.5\n    var c = \"Kof\"\n    var d = true\n    // TODO: imprima os 4, um por linha\n}\n",
+            "42\n3.5\nKof\ntrue\n",
+            "println(a), println(b), println(c), println(d).",
+            "main() {\n    var a = 42\n    var b = 3.5\n    var c = \"Kof\"\n    var d = true\n    println(a)\n    println(b)\n    println(c)\n    println(d)\n}\n",
+            "principal() {\n    var a = 42\n    var b = 3.5\n    var c = \"Kof\"\n    var d = verdadeiro\n    // TODO: imprima os 4, um por linha\n}\n",
+            "escrevaln(a), escrevaln(b), escrevaln(c), escrevaln(d).",
+            "principal() {\n    var a = 42\n    var b = 3.5\n    var c = \"Kof\"\n    var d = verdadeiro\n    escrevaln(a)\n    escrevaln(b)\n    escrevaln(c)\n    escrevaln(d)\n}\n"
+        ),
+        Lesson(
+            "tabuada",
+            "Tabuada com for",
+            "Fácil",
+            15,
+            "O for clássico conta com início, condição e passo: for (var i = 1; i <= 10; i++). Imprima a tabuada do 3.",
+            "main() {\n    // TODO: for de 1 a 10 imprimindo 3 * i\n}\n",
+            "3\n6\n9\n12\n15\n18\n21\n24\n27\n30\n",
+            "for (var i = 1; i <= 10; i++) {\n    println(3 * i)\n}",
+            "main() {\n    for (var i = 1; i <= 10; i++) {\n        println(3 * i)\n    }\n}\n",
+            "principal() {\n    // TODO: para de 1 a 10 imprimindo 3 * i\n}\n",
+            "para (var i = 1; i <= 10; i = i + 1) {\n    escrevaln(3 * i)\n}",
+            "principal() {\n    para (var i = 1; i <= 10; i = i + 1) {\n        escrevaln(3 * i)\n    }\n}\n"
+        ),
+        Lesson(
+            "lista-get",
+            "Lendo posições da lista",
+            "Fácil",
+            15,
+            "get(i) lê a posição (começa em 0) e size() diz o tamanho. Imprima o primeiro, o último e o tamanho.",
+            "main() {\n    var xs = listOf(10, 20, 30)\n    // TODO: imprima get(0), get(2) e size()\n}\n",
+            "10\n30\n3\n",
+            "println(xs.get(0)); índices começam em 0.",
+            "main() {\n    var xs = listOf(10, 20, 30)\n    println(xs.get(0))\n    println(xs.get(2))\n    println(xs.size())\n}\n",
+            "principal() {\n    var xs = listaDe(10, 20, 30)\n    // TODO: imprima get(0), get(2) e tamanho()\n}\n",
+            "escrevaln(xs.get(0)); índices começam em 0.",
+            "principal() {\n    var xs = listaDe(10, 20, 30)\n    escrevaln(xs.get(0))\n    escrevaln(xs.get(2))\n    escrevaln(xs.tamanho())\n}\n"
+        ),
+        Lesson(
+            "recursao",
+            "Recursão: fatorial",
+            "Médio",
+            30,
+            "Função que chama a si mesma: fat(n) = n * fat(n-1), parando em n <= 1. fat(5) = 120.",
+            "Int fat(Int n) {\n    // TODO: se n <= 1 retorne 1, senão n * fat(n - 1)\n}\nmain() {\n    println(fat(5))\n}\n",
+            "120\n",
+            "if (n <= 1) {\n    return 1\n}\nreturn n * fat(n - 1)",
+            "Int fat(Int n) {\n    if (n <= 1) {\n        return 1\n    }\n    return n * fat(n - 1)\n}\nmain() {\n    println(fat(5))\n}\n",
+            "Int fat(Int n) {\n    // TODO: se n <= 1 retorne 1, senão n * fat(n - 1)\n}\nprincipal() {\n    escrevaln(fat(5))\n}\n",
+            "se (n <= 1) {\n    retorna 1\n}\nretorna n * fat(n - 1)",
+            "Int fat(Int n) {\n    se (n <= 1) {\n        retorna 1\n    }\n    retorna n * fat(n - 1)\n}\nprincipal() {\n    escrevaln(fat(5))\n}\n"
+        ),
+        Lesson(
+            "primo",
+            "Teste de primalidade",
+            "Difícil",
+            40,
+            "Um número é primo se ninguém de 2 até a raiz divide ele (n % i == 0 acusa divisor). Teste 2, 9 e 17.",
+            "Bool primo(Int n) {\n    // TODO: false se n < 2 ou algum i com i*i<=n divide n; true no resto\n}\nmain() {\n    println(primo(2))\n    println(primo(9))\n    println(primo(17))\n}\n",
+            "true\nfalse\ntrue\n",
+            "while com i*i<=n; if (n % i == 0) { return false }.",
+            "Bool primo(Int n) {\n    if (n < 2) {\n        return false\n    }\n    var i = 2\n    while (i * i <= n) {\n        if (n % i == 0) {\n            return false\n        }\n        i = i + 1\n    }\n    return true\n}\nmain() {\n    println(primo(2))\n    println(primo(9))\n    println(primo(17))\n}\n",
+            "Bool primo(Int n) {\n    // TODO: falso se n < 2 ou algum i com i*i<=n divide n; verdadeiro no resto\n}\nprincipal() {\n    escrevaln(primo(2))\n    escrevaln(primo(9))\n    escrevaln(primo(17))\n}\n",
+            "enquanto com i*i<=n; se (n % i == 0) { retorna falso }.",
+            "Bool primo(Int n) {\n    se (n < 2) {\n        retorna falso\n    }\n    var i = 2\n    enquanto (i * i <= n) {\n        se (n % i == 0) {\n            retorna falso\n        }\n        i = i + 1\n    }\n    retorna verdadeiro\n}\nprincipal() {\n    escrevaln(primo(2))\n    escrevaln(primo(9))\n    escrevaln(primo(17))\n}\n"
+        ),
+        Lesson(
+            "ordenar",
+            "Bolha: ordenar lista",
+            "Difícil",
+            50,
+            "Bubble sort: dois whiles aninhados; se o da frente é menor, troca com set (guarde um lado em t). [5,2,8,1,4] vira [1,2,4,5,8].",
+            "main() {\n    var xs = listOf(5, 2, 8, 1, 4)\n    // TODO: dois whiles + troca via set, depois println(xs)\n}\n",
+            "[1, 2, 4, 5, 8]\n",
+            "if (xs.get(j) < xs.get(i)) { var t = xs.get(i); xs.set(i, xs.get(j)); xs.set(j, t) }",
+            "main() {\n    var xs = listOf(5, 2, 8, 1, 4)\n    var i = 0\n    while (i < xs.size()) {\n        var j = i + 1\n        while (j < xs.size()) {\n            if (xs.get(j) < xs.get(i)) {\n                var t = xs.get(i)\n                xs.set(i, xs.get(j))\n                xs.set(j, t)\n            }\n            j = j + 1\n        }\n        i = i + 1\n    }\n    println(xs)\n}\n",
+            "principal() {\n    var xs = listaDe(5, 2, 8, 1, 4)\n    // TODO: dois enquantos + troca via set, depois escrevaln(xs)\n}\n",
+            "se (xs.get(j) < xs.get(i)) { var t = xs.get(i); xs.set(i, xs.get(j)); xs.set(j, t) }",
+            "principal() {\n    var xs = listaDe(5, 2, 8, 1, 4)\n    var i = 0\n    enquanto (i < xs.tamanho()) {\n        var j = i + 1\n        enquanto (j < xs.tamanho()) {\n            se (xs.get(j) < xs.get(i)) {\n                var t = xs.get(i)\n                xs.set(i, xs.get(j))\n                xs.set(j, t)\n            }\n            j = j + 1\n        }\n        i = i + 1\n    }\n    escrevaln(xs)\n}\n"
+        ),
+        Lesson(
+            "fibonacci",
+            "Sequência de Fibonacci",
+            "Difícil",
+            40,
+            "Cada termo é a soma dos dois anteriores (0, 1, ...). Guarde a e b, imprima a, avance, repita 10 vezes.",
+            "main() {\n    var a = 0\n    var b = 1\n    var i = 0\n    // TODO: while 10x imprimindo a e avançando\n}\n",
+            "0\n1\n1\n2\n3\n5\n8\n13\n21\n34\n",
+            "println(a); var t = a + b; a = b; b = t.",
+            "main() {\n    var a = 0\n    var b = 1\n    var i = 0\n    while (i < 10) {\n        println(a)\n        var t = a + b\n        a = b\n        b = t\n        i = i + 1\n    }\n}\n",
+            "principal() {\n    var a = 0\n    var b = 1\n    var i = 0\n    // TODO: enquanto 10x imprimindo a e avançando\n}\n",
+            "escrevaln(a); var t = a + b; a = b; b = t.",
+            "principal() {\n    var a = 0\n    var b = 1\n    var i = 0\n    enquanto (i < 10) {\n        escrevaln(a)\n        var t = a + b\n        a = b\n        b = t\n        i = i + 1\n    }\n}\n"
+        ),
+        Lesson(
+            "mdc",
+            "Euclides: MDC",
+            "Difícil",
+            40,
+            "O algoritmo de Euclides: enquanto b != 0, gire (a, b) para (b, a % b). MDC(48, 18) = 6.",
+            "main() {\n    var a = 48\n    var b = 18\n    // TODO: while girando até b zerar, depois println(a)\n}\n",
+            "6\n",
+            "var t = b; b = a % b; a = t.",
+            "main() {\n    var a = 48\n    var b = 18\n    while (b != 0) {\n        var t = b\n        b = a % b\n        a = t\n    }\n    println(a)\n}\n",
+            "principal() {\n    var a = 48\n    var b = 18\n    // TODO: enquanto girando até b zerar, depois escrevaln(a)\n}\n",
+            "var t = b; b = a % b; a = t.",
+            "principal() {\n    var a = 48\n    var b = 18\n    enquanto (b != 0) {\n        var t = b\n        b = a % b\n        a = t\n    }\n    escrevaln(a)\n}\n"
+        ),
+        Lesson(
+            "matriz-soma",
+            "Matriz: soma tudo",
+            "Difícil",
+            50,
+            "Lista de listas é matriz: dois whiles (linha, coluna), get duplo acumulando em s. [[1,2],[3,4]] soma 10.",
+            "main() {\n    var m = listOf(listOf(1, 2), listOf(3, 4))\n    var s = 0\n    // TODO: dois whiles somando m.get(i).get(j) em s, depois println(s)\n}\n",
+            "10\n",
+            "var row = m.get(i); s = s + row.get(j).",
+            "main() {\n    var m = listOf(listOf(1, 2), listOf(3, 4))\n    var s = 0\n    var i = 0\n    while (i < m.size()) {\n        var row = m.get(i)\n        var j = 0\n        while (j < row.size()) {\n            s = s + row.get(j)\n            j = j + 1\n        }\n        i = i + 1\n    }\n    println(s)\n}\n",
+            "principal() {\n    var m = listaDe(listaDe(1, 2), listaDe(3, 4))\n    var s = 0\n    // TODO: dois enquantos somando m.get(i).get(j) em s, depois escrevaln(s)\n}\n",
+            "var row = m.get(i); s = s + row.get(j).",
+            "principal() {\n    var m = listaDe(listaDe(1, 2), listaDe(3, 4))\n    var s = 0\n    var i = 0\n    enquanto (i < m.tamanho()) {\n        var row = m.get(i)\n        var j = 0\n        enquanto (j < row.tamanho()) {\n            s = s + row.get(j)\n            j = j + 1\n        }\n        i = i + 1\n    }\n    escrevaln(s)\n}\n"
+        ),
+        Lesson(
+            "binario",
+            "Decimal para binário",
+            "Difícil",
+            40,
+            "Resto por 2 dá o bit (% 2), divisão inteira anda ((n-bit)/2). Monte a string na frente (bit + s): 13 vira 1101.",
+            "main() {\n    var n = 13\n    var s = \"\"\n    // TODO: while montando bits na frente, depois println(s)\n}\n",
+            "1101\n",
+            "s = \"0\" + s ou s = \"1\" + s; n = (n - bit) / 2.",
+            "main() {\n    var n = 13\n    var s = \"\"\n    while (n > 0) {\n        var bit = n % 2\n        if (bit == 0) {\n            s = \"0\" + s\n        } else {\n            s = \"1\" + s\n        }\n        n = (n - bit) / 2\n    }\n    println(s)\n}\n",
+            "principal() {\n    var n = 13\n    var s = \"\"\n    // TODO: enquanto montando bits na frente, depois escrevaln(s)\n}\n",
+            "s = \"0\" + s ou s = \"1\" + s; n = (n - bit) / 2.",
+            "principal() {\n    var n = 13\n    var s = \"\"\n    enquanto (n > 0) {\n        var bit = n % 2\n        se (bit == 0) {\n            s = \"0\" + s\n        } senao {\n            s = \"1\" + s\n        }\n        n = (n - bit) / 2\n    }\n    escrevaln(s)\n}\n"
         )
     )
 }
@@ -309,8 +463,8 @@ Bool lessonExists(String id) {
 
 // ---- Testes (`kof test kofplay/Lessons.kf`) ----
 
-test "catalogo tem 19 licoes" {
-    assert(lessonCount() == 19)
+test "catalogo tem 30 licoes" {
+    assert(lessonCount() == 30)
 }
 
 test "ids sao unicos" {
