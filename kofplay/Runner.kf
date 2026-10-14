@@ -58,7 +58,25 @@ String classifyError(String stderr, Int exitCode) {
     return "RUNTIME"
 }
 
+String normalizeLang(String language) {
+    if (language == "portukof") {
+        return "portukof"
+    }
+    return "kof"
+}
+
+String extOf(String language) {
+    if (normalizeLang(language) == "portukof") {
+        return ".ptkf"
+    }
+    return ".kf"
+}
+
 RunResult runKof(String id, String code) {
+    return runKofLang(id, code, "kof")
+}
+
+RunResult runKofLang(String id, String code, String language) {
     if (code == "") {
         return RunResult(-1, "", "codigo vazio: nada para executar", "FAILED", "COMPILE")
     }
@@ -67,7 +85,10 @@ RunResult runKof(String id, String code) {
     }
 
     var u = UUID.randomUUID()
-    var filePath = "/tmp/kofplay_" + u.toString() + ".kf"
+    var dirPath = "/tmp/kofplay_" + u.toString()
+    var dir = Directory(dirPath)
+    dir.createDirectories()
+    var filePath = dirPath + "/prog" + extOf(language)
 
     var path = Path(filePath)
     var ok = path.writeText(code)
@@ -124,4 +145,24 @@ test "runKof erro de compilacao classifica COMPILE" {
     var r = runKof("t-err", "main() {\n    println(desconhecida)\n}\n")
     assert(r.exitCode() != 0)
     assert(r.errorKind() == "COMPILE")
+}
+
+test "normalizeLang: ausente e desconhecido viram kof" {
+    assert(normalizeLang("portukof") == "portukof")
+    assert(normalizeLang("kof") == "kof")
+    assert(normalizeLang("bla") == "kof")
+    assert(extOf("portukof") == ".ptkf")
+    assert(extOf("kof") == ".kf")
+}
+
+test "runKofLang portukof executa .ptkf" {
+    var r = runKofLang("t-pt", "principal() {\n    escrevaln(\"Oi\")\n}\n", "portukof")
+    assert(r.exitCode() == 0)
+    assert(r.stdout() == "Oi\n")
+}
+
+test "runKofLang sem language usa kof" {
+    var r = runKofLang("t-def", "main() {\n    println(\"Oi\")\n}\n", "")
+    assert(r.exitCode() == 0)
+    assert(r.stdout() == "Oi\n")
 }

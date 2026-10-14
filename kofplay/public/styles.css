@@ -201,6 +201,7 @@ body {
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #04120b; }
 .btn-primary:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
 .btn-secondary:hover:not(:disabled) { border-color: var(--accent); }
+.btn.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .btn:disabled { opacity: 0.6; cursor: wait; }
 
 .editor-wrap {

@@ -1,13 +1,14 @@
 // Daemon.kf — Servidor HTTP do KofPlay (Kof real, 0.6.4)
 //
 // Rotas: GET / (UI), GET /api/health, GET /api/lessons,
-// POST /api/run {code}, POST /api/submit {lessonId, code}.
+// POST /api/run {code, language?}, POST /api/submit {lessonId, code, language?}.
+// language: "kof" (padrão) ou "portukof" (.ptkf); ausente/desconhecido = kof.
 // Auth opcional via kofplay.api-key; log/auditoria em submissions.jsonl.
 
 import java.lang.Exception
 
-record RunRequest(String code)
-record SubmitRequest(String lessonId, String code)
+record RunRequest(String code, String language)
+record SubmitRequest(String lessonId, String code, String language)
 
 String submissionsPath() {
     return config.str("kofplay.history-file", "submissions.jsonl")
@@ -120,12 +121,12 @@ String healthJson(String portStr) {
     return "{\"status\":\"UP\",\"service\":\"kofplay\",\"port\":" + portStr + ",\"timeout_seconds\":" + timeoutStr + ",\"auth_required\":" + auth + ",\"kof_version\":" + json.encode(kofVersion()) + "}"
 }
 
-String submitJson(String lessonId, String code) {
+String submitJson(String lessonId, String code, String language) {
     if (lessonExists(lessonId) == false) {
         return "{\"passed\":false,\"xpAwarded\":0,\"error\":\"licao desconhecida: " + lessonId + "\"}"
     }
     var lesson = findLesson(lessonId)
-    var result = runKof(lessonId, code)
+    var result = runKofLang(lessonId, code, language)
     var passed = false
     if (result.exitCode() == 0) {
         if (result.stdout() == lesson.expected()) {
@@ -183,7 +184,7 @@ void startDaemon(Int port) {
         }
         try {
             var req = json.decode<RunRequest>(body())
-            var result = runKof("run", req.code())
+            var result = runKofLang("run", req.code(), req.language())
             return json.encode(result)
         } catch (Exception e) {
             var msg = e.getMessage()
@@ -201,7 +202,7 @@ void startDaemon(Int port) {
         }
         try {
             var req = json.decode<SubmitRequest>(body())
-            return submitJson(req.lessonId(), req.code())
+            return submitJson(req.lessonId(), req.code(), req.language())
         } catch (Exception e) {
             var msg = e.getMessage()
             if (msg == null) {

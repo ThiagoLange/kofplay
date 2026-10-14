@@ -22,6 +22,17 @@ curl -s -X POST localhost:8081/api/run -H 'Content-Type: application/json' \
 # {"exitCode":0,"stdout":"42\n","stderr":"","status":"SUCCESS","errorKind":"NONE"}
 ```
 
+PortuKof (`.ptkf`, mesmos exercícios, mesma saída esperada):
+
+```bash
+curl -s -X POST localhost:8081/api/run -H 'Content-Type: application/json' \
+  -d '{"code":"principal() {\n    escrevaln(6*7)\n}\n","language":"portukof"}'
+# {"exitCode":0,"stdout":"42\n","stderr":"","status":"SUCCESS","errorKind":"NONE"}
+```
+
+- `language`: `"kof"` (padrão; ausente/desconhecido cai aqui) ou `"portukof"`.
+  O Runner escolhe a extensão (`.kf`/`.ptkf`) — o compilador é o mesmo.
+
 Erro de compilação (código real da linguagem no stderr):
 
 ```json
@@ -43,6 +54,8 @@ curl -s -X POST localhost:8081/api/submit -H 'Content-Type: application/json' \
 - `passed` = exit 0 **e** stdout exatamente igual ao `expected` (println termina com `\n`).
 - Lição inexistente: `{"passed":false,"xpAwarded":0,"error":"licao desconhecida: ..."}`.
 - Todo submit é auditado em `submissions.jsonl` (`{lesson, passed, xp}`).
+- `language` opcional (`"portukof"` para a variante em português; o `expected`
+  é o mesmo nas duas línguas). A UI tem o seletor Kof | PortuKof no editor.
 
 ## Auth
 

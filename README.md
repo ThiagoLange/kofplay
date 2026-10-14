@@ -6,7 +6,8 @@ verdade** (nada de mock: erros vêm com os códigos amigáveis da linguagem).
 
 ## Como funciona
 
-- 📚 **19 lições em PT-BR** (460 XP): do `Olá, Kof!` ao FizzBuzz chefe final.
+- 📚 **19 lições em PT-BR** (460 XP): do `Olá, Kof!` ao FizzBuzz chefe final —
+  cada uma em **Kof e PortuKof** (mesmo exercício, mesma saída; seletor no editor).
 - ▶️ **Editor no navegador** com Executar, Submeter, dicas e soluções progressivas.
 - ⚙️ **Backend em Kof puro** (`kof.web` + `json` + `kof.io`, zero Spring/Express):
   recebe o código via JSON, executa isolado com timeout e devolve stdout,

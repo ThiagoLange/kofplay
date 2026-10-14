@@ -6,6 +6,7 @@
 
     var lessons = [];
     var current = null;
+    var lang = "kof";
     var codeArea = $("codeArea");
     var gutter = $("gutter");
     var outputBox = $("outputBox");
@@ -107,7 +108,7 @@
         p.textContent = current.description;
         box.appendChild(head);
         box.appendChild(p);
-        codeArea.value = current.starter;
+        codeArea.value = langStarter();
         $("hintBox").classList.add("hidden");
         $("solutionBox").classList.add("hidden");
         $("verdictBox").classList.add("hidden");
@@ -116,6 +117,21 @@
         setBadge("idle", "muted");
         refreshGutter();
         renderLessonList();
+    }
+
+    function langStarter() { return lang === "portukof" ? (current.starterPtkf || current.starter) : current.starter; }
+    function langSolution() { return lang === "portukof" ? (current.solutionPtkf || current.solution) : current.solution; }
+    function langHint() { return lang === "portukof" ? (current.hintPtkf || current.hint) : current.hint; }
+
+    function setLang(next) {
+        lang = (next === "portukof") ? "portukof" : "kof";
+        $("langKofBtn").classList.toggle("active", lang === "kof");
+        $("langPtkfBtn").classList.toggle("active", lang === "portukof");
+        if (!current) { return; }
+        codeArea.value = langStarter();
+        $("hintBox").classList.add("hidden");
+        $("solutionBox").classList.add("hidden");
+        refreshGutter();
     }
 
     function refreshGutter() {
@@ -139,7 +155,7 @@
         outputBox.classList.remove("is-error");
         setBadge("running…", "warn");
         $("runBtn").disabled = true;
-        post("/api/run", { code: codeArea.value }).then(function (d) {
+        post("/api/run", { code: codeArea.value, language: lang }).then(function (d) {
             if (d.exitCode === 0) {
                 outputBox.textContent = d.stdout || "(sem saída)";
                 setBadge("SUCCESS", "ok");
@@ -164,7 +180,7 @@
         $("submitBtn").disabled = true;
         var v = $("verdictBox");
         v.classList.add("hidden");
-        post("/api/submit", { lessonId: current.id, code: codeArea.value }).then(function (d) {
+        post("/api/submit", { lessonId: current.id, code: codeArea.value, language: lang }).then(function (d) {
             v.classList.remove("hidden");
             if (d.passed) {
                 var first = store.addXp(d.xpAwarded, current.id);
@@ -207,15 +223,18 @@
     $("hintBtn").addEventListener("click", function () {
         if (!current) { return; }
         var box = $("hintBox");
-        box.textContent = current.hint;
+        box.textContent = langHint();
         box.classList.toggle("hidden");
     });
     $("solutionBtn").addEventListener("click", function () {
         if (!current) { return; }
         var box = $("solutionBox");
-        box.textContent = current.solution;
+        box.textContent = langSolution();
         box.classList.toggle("hidden");
     });
+    $("langKofBtn").addEventListener("click", function () { setLang("kof"); });
+    $("langPtkfBtn").addEventListener("click", function () { setLang("portukof"); });
+    setLang("kof");
     $("apiKeyInput").addEventListener("change", function () {
         try { localStorage.setItem("kofplay_api_key", $("apiKeyInput").value); } catch (e) {}
     });
